@@ -8,6 +8,8 @@
 //#include <MFRC522DriverI2C.h>
 #include <MFRC522DriverPinSimple.h>
 #include <MFRC522Debug.h>
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
 
 
 const char broker[] = "10.93.136.51";
@@ -23,6 +25,10 @@ MFRC522DriverSPI driver{ss_pin}; // Create SPI driver
 //MFRC522DriverI2C driver{};     // Create I2C driver
 MFRC522 mfrc522{driver};         // Create MFRC522 instance
 
+//LCD Setup
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+#define SDA_PIN 15
+#define SCL_PIN 14
 
 // DHT11 Setup
 #define DHTPIN 25       // Pin connected to the DHT11 sensor
@@ -57,7 +63,10 @@ SensorData readDHTSensor() {
 
 void setup() {
   Serial.begin(9600);
-
+  Wire.begin(SDA_PIN, SCL_PIN);
+  
+  lcd.init();                      // Initialize the LCD
+  lcd.backlight();                 
 
   mfrc522.PCD_Init();    // Init MFRC522 board.
   MFRC522Debug::PCD_DumpVersionToSerial(mfrc522, Serial);	// Show details of PCD - MFRC522 Card Reader details.
@@ -82,8 +91,12 @@ void loop() {
 
   publishMessage("RZ/Temperatur", String(sensorData.temperature));
   publishMessage("RZ/Feuchtigkeit", String(sensorData.humidity));
+  lcd.setCursor(0, 0);             // Set cursor to column 0, row 0
+  lcd.print("Tmp: " + String(sensorData.temperature) + "C");
+  lcd.setCursor(0,1);
+  lcd.print("LF: " + String(sensorData.humidity) + "%");
   delay(1000);
-
+  lcd.clear();
   if (!mfrc522.PICC_IsNewCardPresent()) {
       return;
     }
