@@ -30,17 +30,12 @@
 
 ## 📁 Projektstruktur
 
-Projekt-2-IoT/
-│
-├── backend/           # MQTT-Verarbeitung, DB-Anbindung
-│   └── src/
-├── frontend/          # Visualisierung im Browser
-│   └── public/
-│
-├── microcontroller/   # Code für ESP32, Arduino etc.
-│
-├── docs/              # Projektstrukturplan, Gantt, Risikoanalyse etc.
-│
-├── materials/         # Materialliste, Bestellinfos
-│
-└── README.md
+**Projekt-2-IoT/**  
+&nbsp;&nbsp;&nbsp;&nbsp;├── **backend/** – MQTT-Verarbeitung & Datenbank-Anbindung  
+&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;└── **src/** – Quellcode für das Backend  
+&nbsp;&nbsp;&nbsp;&nbsp;├── **frontend/** – Visualisierung im Browser  
+&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;└── **public/** – Statische Dateien (HTML, CSS, JS)  
+&nbsp;&nbsp;&nbsp;&nbsp;├── **microcontroller/** – Code für ESP32, Arduino etc.  
+&nbsp;&nbsp;&nbsp;&nbsp;├── **docs/** – Projektstrukturplan, Gantt, Risikoanalyse etc.  
+&nbsp;&nbsp;&nbsp;&nbsp;├── **materials/** – Materialliste & Bestellinformationen  
+&nbsp;&nbsp;&nbsp;&nbsp;└── **README.md** – Dieses Dokument  
