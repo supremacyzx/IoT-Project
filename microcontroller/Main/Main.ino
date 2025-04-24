@@ -29,7 +29,7 @@ int num_access_ids = sizeof(access_ids) / sizeof(access_ids[0]); // Calculate th
 //Wifi Conf
 char ssid[] = "FES-SuS";  // Enter your Wi-Fi SSID here
 char password[] = "SuS-WLAN!Key24";  // Enter your Wi-Fi password here
-bool useWifi = false;
+bool useWifi = true;
 WiFiClient wifiClient;  // Wi-Fi client
 
 //LED Setup
@@ -63,6 +63,26 @@ DHT dht(DHTPIN, DHTTYPE);  // Initialize DHT sensor
 #pragma endregion
 
 #pragma region :: Custom Methods
+
+struct SensorData {
+  float temperature;
+  float humidity;
+};
+
+SensorData readDHTSensor() {
+  SensorData data;
+
+  data.humidity = dht.readHumidity();
+  data.temperature = dht.readTemperature();  
+
+  if (isnan(data.humidity) || isnan(data.temperature)) {
+    Serial.println("Failed to read from DHT sensor!");
+    data.temperature = NAN;  
+    data.humidity = NAN;
+  }
+
+  return data;
+}
 
 String readCard(){
   MFRC522Debug::PrintUID(Serial, (mfrc522.uid));
@@ -128,25 +148,7 @@ void publishMessage(String topic, String msg) {
   Serial.println("Sent MQTT msg to " + topic + " Value: " + msg);
 }
 
-struct SensorData {
-  float temperature;
-  float humidity;
-};
 
-SensorData readDHTSensor() {
-  SensorData data;
-
-  data.humidity = dht.readHumidity();
-  data.temperature = dht.readTemperature();  
-
-  if (isnan(data.humidity) || isnan(data.temperature)) {
-    Serial.println("Failed to read from DHT sensor!");
-    data.temperature = NAN;  
-    data.humidity = NAN;
-  }
-
-  return data;
-}
 
 #pragma endregion
 
@@ -168,7 +170,7 @@ void setup() {
 
   if (useWifi) {
     connectToWifi(ssid, password);
-   // connectToMQTT(broker, port);
+    connectToMQTT(broker, port);
   }
 
   dht.begin();
@@ -207,8 +209,13 @@ void loop() {
     return;
   }
   String cardID = readCard();
-  if (armed and cardID){
-    checkAccess(cardID);
+  bool accesGranted = checkAccess(cardID);
+  if (accesGranted){
+    if(armed){
+      armed = false;
+    }else if(!armed){
+      armed = true;
+    }
   }
   
  
