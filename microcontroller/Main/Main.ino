@@ -64,7 +64,6 @@ DHT dht(DHTPIN, DHTTYPE);  // Initialize DHT sensor
 
 #pragma region :: Custom Methods
 
-
 String readCard(){
   MFRC522Debug::PrintUID(Serial, (mfrc522.uid));
   Serial.println();
@@ -128,7 +127,6 @@ void publishMessage(String topic, String msg) {
   mqttClient.endMessage();         // End the message and send it
   Serial.println("Sent MQTT msg to " + topic + " Value: " + msg);
 }
-
 
 struct SensorData {
   float temperature;
