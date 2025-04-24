@@ -33,6 +33,7 @@
 &nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;└── **src/** – Quellcode für das Backend  
 &nbsp;&nbsp;&nbsp;&nbsp;├── **frontend/** – Visualisierung im Browser  
 &nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;└── **public/** – Statische Dateien (HTML, CSS, JS)  
+&nbsp;&nbsp;&nbsp;&nbsp;├── **shared/** – Enthält Interfaces & Types die vom Frontend & Backend verwendet werden
 &nbsp;&nbsp;&nbsp;&nbsp;├── **microcontroller/** – Code für ESP32, Arduino etc.  
 &nbsp;&nbsp;&nbsp;&nbsp;├── **docs/** – Projektstrukturplan, Gantt, Risikoanalyse etc.  
 &nbsp;&nbsp;&nbsp;&nbsp;├── **materials/** – Materialliste & Bestellinformationen  
