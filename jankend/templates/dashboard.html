@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.3/socket.io.min.js"></script>
+</head>
+<body>
+
+  <div class="container">
+    <h2>MQTT Dashboard</h2>
+
+    <!-- Current Values Display -->
+    <div class="current-values">
+      <div>
+        <h3>Current Temperature (°C):</h3>
+        <p id="current-tmp">Loading...</p>
+      </div>
+      <div>
+        <h3>Current LF:</h3>
+        <p id="current-lf">Loading...</p>
+      </div>
+    </div>
+
+    <div class="dashboard-container">
+      <div>
+        <h3>Temperature (°C)</h3>
+        <canvas id="tmpChart" width="800" height="300"></canvas>
+      </div>
+
+      <div>
+        <h3>LF</h3>
+        <canvas id="lfChart" width="800" height="300"></canvas>
+      </div>
+    </div>
+
+    <a href="{{ url_for('logout') }}">Logout</a>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    // Pre-existing data from Flask
+    const rawLabels = {{ labels | tojson }};
+    const tmpData = {{ tmp_data | tojson }};
+    const lfData = {{ lf_data | tojson }};
+    
+    // Initialize current values with the latest DB entry if available
+    let currentTmp = "Loading...";
+    let currentLf = "Loading...";
+
+    // Use the latest DB entry if available (the last item in our arrays)
+    if (tmpData.length > 0 && lfData.length > 0) {
+      currentTmp = tmpData[tmpData.length - 1];
+      currentLf = lfData[lfData.length - 1];
+      // Update the DOM with these values
+      updateCurrentValues(currentTmp, currentLf);
+    }
+    
+    // Format timestamps to be more readable
+    const labels = rawLabels.map(timestamp => {
+      // Check if timestamp is in ISO format or contains milliseconds
+      let date;
+      if (timestamp.includes('T') || timestamp.includes('.')) {
+        date = new Date(timestamp);
+      } else {
+        // If it's the format like "2025-04-24 17:44:19.467135"
+        date = new Date(timestamp.replace(' ', 'T'));
+      }
+      
+      // Format as "HH:MM" if today, or "MM/DD HH:MM" otherwise
+      const today = new Date();
+      const isToday = date.getDate() === today.getDate() && 
+                      date.getMonth() === today.getMonth() && 
+                      date.getFullYear() === today.getFullYear();
+      
+      if (isToday) {
+        return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      } else {
+        return date.toLocaleDateString([], { month: 'numeric', day: 'numeric' }) + ' ' + 
+               date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      }
+    });
+
+    // Update the current values in real-time
+    function updateCurrentValues(tmp, lf) {
+      document.getElementById("current-tmp").textContent = tmp !== null ? tmp : "N/A";
+      document.getElementById("current-lf").textContent = lf !== null ? lf : "N/A";
+    }
+
+    // Create chart for Temperature
+    const tmpCtx = document.getElementById('tmpChart').getContext('2d');
+    const tmpChart = new Chart(tmpCtx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Temperature (°C)',
+                data: tmpData,
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 2,
+                fill: false
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                x: { 
+                    ticks: { 
+                        maxTicksLimit: 8,
+                        maxRotation: 0,
+                        minRotation: 0,
+                        color: '#aaaaaa'
+                    },
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.05)'
+                    }
+                },
+                y: {
+                    ticks: {
+                        color: '#aaaaaa'
+                    },
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.05)'
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#ffffff'
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(40, 40, 40, 0.8)',
+                    titleColor: '#ffffff',
+                    bodyColor: '#e0e0e0',
+                    callbacks: {
+                        title: function(tooltipItems) {
+                            const index = tooltipItems[0].dataIndex;
+                            return rawLabels[index];
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Create chart for LF
+    const lfCtx = document.getElementById('lfChart').getContext('2d');
+    const lfChart = new Chart(lfCtx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'LF',
+                data: lfData,
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 2,
+                fill: false
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                x: { 
+                    ticks: { 
+                        maxTicksLimit: 8,
+                        maxRotation: 0,
+                        minRotation: 0,
+                        color: '#aaaaaa'
+                    },
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.05)'
+                    }
+                },
+                y: {
+                    ticks: {
+                        color: '#aaaaaa'
+                    },
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.05)'
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#ffffff'
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(40, 40, 40, 0.8)',
+                    titleColor: '#ffffff',
+                    bodyColor: '#e0e0e0',
+                    callbacks: {
+                        title: function(tooltipItems) {
+                            const index = tooltipItems[0].dataIndex;
+                            return rawLabels[index];
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Connection status indicator
+    let connectionTimeout;
+    let isConnected = false;
+
+    // WebSocket to connect to MQTT broker for real-time updates
+    const socket = io.connect(window.location.protocol + '//' + window.location.hostname + ':' + window.location.port);
+
+    socket.on('connect', function() {
+        console.log('Connected to Flask-SocketIO server');
+        isConnected = true;
+        clearTimeout(connectionTimeout);
+    });
+
+    socket.on('disconnect', function() {
+        console.log('Disconnected from Flask-SocketIO server');
+        isConnected = false;
+    });
+
+    // Set a timeout to check if we've received socket data
+    connectionTimeout = setTimeout(function() {
+        if (!isConnected) {
+            console.log('Socket connection timeout - using latest DB data');
+        }
+    }, 5000);  // 5 second timeout
+
+    // Listen for the 'mqtt_data' event from Flask and update the dashboard
+    socket.on('mqtt_data', function(datas) {
+        console.log('Received MQTT data:', datas);
+        const data = datas;
+        
+        // Update the current values regardless of null values
+        currentTmp = data.tmp;
+        currentLf = data.lf;
+        updateCurrentValues(currentTmp, currentLf);
+
+        // Only add to chart if we have valid numeric data
+        if (data.tmp !== null && data.lf !== null) {
+            // Format current time for chart
+            const currentTime = new Date();
+            const timeString = currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            
+            // Add new data point to the temperature chart
+            if (tmpChart.data.labels.length > 50) {
+                tmpChart.data.labels.shift();
+                tmpChart.data.datasets[0].data.shift();
+            }
+            tmpChart.data.labels.push(timeString);
+            tmpChart.data.datasets[0].data.push(data.tmp);
+            tmpChart.update();
+
+            // Add new data point to the LF chart
+            if (lfChart.data.labels.length > 50) {
+                lfChart.data.labels.shift();
+                lfChart.data.datasets[0].data.shift();
+            }
+            lfChart.data.labels.push(timeString);
+            lfChart.data.datasets[0].data.push(data.lf);
+            lfChart.update();
+        }
+    });
+  </script>
+</body>
+</html>
