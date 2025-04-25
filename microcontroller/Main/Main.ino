@@ -310,27 +310,53 @@ bool checkAccess(String id) {
   Serial.println(id);
   for(int i = 0; i < num_access_ids; i++) {
     if(access_ids[i] == id) {
+      lcd->clear();
+      lcd->print("Access granted");
+      delay(1000);
+      lcd->clear();
       Serial.println("Access granted");
       return true; // ID found in the access list
     }
   }
   Serial.println("Access denied");
+  lcd->clear();
+  lcd->print("Access denied");
+  delay(1000);
+  lcd->clear();
   return false; // ID not found
 }
 
 void connectToMQTT(const char* broker, const int port) {
   // Connect to the MQTT broker
-  if (!mqttClient.connect(broker, port)) {
-    Serial.print("MQTT connection failed! Error code = ");
-    Serial.println(mqttClient.connectError());
-    return;
+  Serial.println("Connecting to MQTT Broker..");
+  lcd->clear();
+  lcd->print("Init MQTT..");
+  int attempts = 0;
+  while (attempts < 50) {
+    int mqttstatus = mqttClient.connect(broker, port);
+    if (!mqttstatus){
+      delay(1000);
+      Serial.print(".");
+      Serial.println(String(mqttstatus));
+      attempts++;
+    }else{
+      Serial.println(String(mqttstatus));
+      Serial.println("Connected to broker.");
+      lcd->clear();
+      lcd->print("MQTT successful");
+      delay(1000);
+      return;
+    }
+    
   }
-  Serial.println("Connected to broker.");
+  
 }
 
 void connectToWifi(const char* ssid, const char* pass) {
   Serial.println("Initializing Wi-Fi...");
-  Serial.println(ssid, pass);
+  //Serial.println(ssid, pass);
+  lcd->clear();
+  lcd->print("Init Wifi..");
   WiFi.begin(ssid, pass);
 
   // Wait for connection with timeout
@@ -348,6 +374,10 @@ void connectToWifi(const char* ssid, const char* pass) {
     Serial.println("Connected to Wi-Fi");
     Serial.println("IP Address: ");
     Serial.println(WiFi.localIP());
+    lcd->clear();
+    lcd->print("Connected to Wifi");
+    delay(500);
+    lcd->clear();
   } else {
     Serial.println("Failed to connect to WiFi, retrying.");
     connectToWifi(ssid, pass);
@@ -358,7 +388,7 @@ void publishMessage(String topic, String msg) {
   mqttClient.beginMessage(topic);  // Start the message with the topic
   mqttClient.print(msg);           // Send the message content
   mqttClient.endMessage();         // End the message and send it
-  Serial.println("Sent MQTT msg to " + topic + " Value: " + msg);
+  //Serial.println("Sent MQTT msg to " + topic + " Value: " + msg);
 }
 
 void initComponents() {
