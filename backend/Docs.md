@@ -17,7 +17,7 @@ Der Backend-Server ist eine Flask-Anwendung, die als zentraler Datenverwalter zw
 
 ```
 ┌────────────┐     ┌─────────────┐     ┌───────────┐
-│ MQTT-Broker│────▶│ Backend-API │◀────▶│ Frontend  │
+│ MQTT-Broker│────▶│ Backend-API │◀───▶│ Frontend  │
 └────────────┘     └─────────────┘     └───────────┘
                          │
                          ▼
