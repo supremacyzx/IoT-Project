@@ -93,7 +93,7 @@
   /* Current Values Display */
   .current-values {
     display: flex;
-    justify-content: space-around;
+    justify-content: space-evenly;
     margin-bottom: 40px;
     background-color: #252525;
     padding: 20px;

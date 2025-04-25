@@ -29,6 +29,12 @@ bool armed = true;
 String* access_ids;
 int num_access_ids = 0;
 
+//
+struct SensorData {
+  float temperature;
+  float humidity;
+};
+
 // Configuration variables - will be loaded from LittleFS
 struct Config {
   // WiFi Config
@@ -268,10 +274,6 @@ bool saveAccessIds() {
 
 #pragma region :: Custom Methods
 
-struct SensorData {
-  float temperature;
-  float humidity;
-};
 
 SensorData readDHTSensor() {
   SensorData data;
@@ -328,11 +330,12 @@ void connectToMQTT(const char* broker, const int port) {
 
 void connectToWifi(const char* ssid, const char* pass) {
   Serial.println("Initializing Wi-Fi...");
+  Serial.println(ssid, pass);
   WiFi.begin(ssid, pass);
 
   // Wait for connection with timeout
   int attempts = 0;
-  while (WiFi.status() != WL_CONNECTED && attempts < 20) {
+  while (WiFi.status() != WL_CONNECTED && attempts < 100) {
     Serial.print("Status: ");
     Serial.println(WiFi.status());
     delay(1000);
@@ -346,7 +349,8 @@ void connectToWifi(const char* ssid, const char* pass) {
     Serial.println("IP Address: ");
     Serial.println(WiFi.localIP());
   } else {
-    Serial.println("Failed to connect to WiFi");
+    Serial.println("Failed to connect to WiFi, retrying.");
+    connectToWifi(ssid, pass);
   }
 }
 
