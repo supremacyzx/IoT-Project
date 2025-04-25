@@ -31,7 +31,7 @@ CORS(app)
 
 # JWT Configuration
 app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY', 'grp5-secret-key-boys')
-app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=12)
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=os.getenv('JWT_ACCESS_TOKEN_EXPIRES', 12))
 jwt = JWTManager(app)
 
 #Helper Vars for Limiter
