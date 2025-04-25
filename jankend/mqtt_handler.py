@@ -54,6 +54,9 @@ class MQTTClient:
             if "lf" in data:
                 self.latest_data["lf"] = data["lf"]
                 data_updated = True
+            if "locked" in data:
+                self.latest_data["locked"] = data["locked"]
+                data_updated = True
             
             # Emit the updated data to all connected clients
             if data_updated and self.socketio:

@@ -22,6 +22,11 @@
         <h3>Current LF:</h3>
         <p id="current-lf">Loading...</p>
       </div>
+      <!-- New Locked Status Display -->
+      <div>
+        <h3>Lock Status:</h3>
+        <p id="current-locked">Loading...</p>
+      </div>
     </div>
 
     <div class="dashboard-container">
@@ -46,16 +51,26 @@
     const tmpData = {{ tmp_data | tojson }};
     const lfData = {{ lf_data | tojson }};
     
+    // Add locked data from Flask (assuming it's provided)
+    const lockedData = {{ locked_data | tojson if locked_data is defined else '[]' | safe }};
+    
     // Initialize current values with the latest DB entry if available
     let currentTmp = "Loading...";
     let currentLf = "Loading...";
+    let currentLocked = "Loading...";
 
     // Use the latest DB entry if available (the last item in our arrays)
     if (tmpData.length > 0 && lfData.length > 0) {
       currentTmp = tmpData[tmpData.length - 1];
       currentLf = lfData[lfData.length - 1];
+      
+      // Initialize locked status if data is available
+      if (lockedData && lockedData.length > 0) {
+        currentLocked = lockedData[lockedData.length - 1] ? "Locked" : "Unlocked";
+      }
+      
       // Update the DOM with these values
-      updateCurrentValues(currentTmp, currentLf);
+      updateCurrentValues(currentTmp, currentLf, currentLocked);
     }
     
     // Format timestamps to be more readable
@@ -84,9 +99,22 @@
     });
 
     // Update the current values in real-time
-    function updateCurrentValues(tmp, lf) {
+    function updateCurrentValues(tmp, lf, locked) {
       document.getElementById("current-tmp").textContent = tmp !== null ? tmp : "N/A";
       document.getElementById("current-lf").textContent = lf !== null ? lf : "N/A";
+      
+      // Update the locked status with visual indication
+      const lockedElement = document.getElementById("current-locked");
+      if (locked === "Locked") {
+        lockedElement.textContent = "Locked";
+        lockedElement.style.color = "#ff6b6b"; // Red for locked
+      } else if (locked === "Unlocked") {
+        lockedElement.textContent = "Unlocked";
+        lockedElement.style.color = "#51cf66"; // Green for unlocked
+      } else {
+        lockedElement.textContent = locked;
+        lockedElement.style.color = ""; // Default color for loading or other states
+      }
     }
 
     // Create chart for Temperature
@@ -238,7 +266,14 @@
         // Update the current values regardless of null values
         currentTmp = data.tmp;
         currentLf = data.lf;
-        updateCurrentValues(currentTmp, currentLf);
+        
+        // Handle the locked status (convert boolean to text)
+        if (data.locked !== undefined) {
+            currentLocked = data.locked ? "Locked" : "Unlocked";
+        }
+        
+        // Update all the values in the UI
+        updateCurrentValues(currentTmp, currentLf, currentLocked);
 
         // Only add to chart if we have valid numeric data
         if (data.tmp !== null && data.lf !== null) {
