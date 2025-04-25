@@ -29,6 +29,7 @@
     margin-bottom: 15px;
     font-size: 1.3em;
     letter-spacing: 0.3px;
+    max-width: 200px;
   }
   
   /* Container for all pages */
