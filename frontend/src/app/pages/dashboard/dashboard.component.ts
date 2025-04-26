@@ -1,22 +1,18 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { SlideshowComponent } from '../../components/slideshow/slideshow.component';
-import { SlidecontentModel } from '../../../models/slidecontent.model';
-import {AirqualityComponent} from '../../components/airquality/airquality.component';
+import { SlideContentModel } from '../../../models/slideContent.model';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
   imports: [
     CommonModule,
-    SlideshowComponent,
-    AirqualityComponent
   ],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
 })
 export class DashboardComponent {
-  techStack: SlidecontentModel[] = [
+  techStack: SlideContentModel[] = [
     {
       image: 'images/angular.svg',
       link: 'https://angular.io/'
@@ -34,12 +30,12 @@ export class DashboardComponent {
       link: 'https://www.docker.com/'
     },
     {
-      image: 'images/redis.svg',
-      link: 'https://redis.io/'
+      image: 'images/sqlite.svg',
+      link: 'https://sqlite.org/'
     }
   ];
 
-  hardwareStack: SlidecontentModel[] = [
+  hardwareStack: SlideContentModel[] = [
     {
       image: 'images/proxmox.svg',
       link: 'https://www.proxmox.com/'
