@@ -34,7 +34,7 @@ export class AppComponent {
   login(username: string, password: string): void {
     this.authService.login(username, password).subscribe({
       next: () => {
-        this.authService.getProfile().subscribe(); // Fetch user profile after login
+/*        this.authService.getProfile().subscribe(); // Fetch user profile after login*/
       },
       error: () => {
         // Additional error handling if needed
