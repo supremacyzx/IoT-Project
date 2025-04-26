@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { AuthService } from './services/auth.service';
-import {JsonPipe, NgIf} from '@angular/common';
+import { JsonPipe, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 @Component({
@@ -18,7 +18,9 @@ export class AppComponent {
   username = '';
   password = '';
 
-  constructor(protected authService: AuthService) {
+  protected authService = inject(AuthService);
+
+  constructor() {
     if (this.authService.isAuthenticated()) {
       this.authService.getProfile().subscribe({
         error: () => {

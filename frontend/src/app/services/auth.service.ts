@@ -54,7 +54,14 @@ export class AuthService {
         this.isLoading.set(false);
 
         if (error.status === 401) {
-          this.authError.set('Invalid username or password');
+          const attemptsRemaining = error.error?.attempts_remaining;
+          const errorMessage = error.error?.message || 'Invalid username or password';
+
+          if (attemptsRemaining !== undefined) {
+            this.authError.set(`${errorMessage}. Attempts remaining: ${attemptsRemaining}`);
+          } else {
+            this.authError.set(errorMessage);
+          }
         } else if (error.status === 429) {
           this.authError.set('Too many login attempts. Please try again later.');
         } else {
@@ -106,3 +113,4 @@ export class AuthService {
     return !!localStorage.getItem('auth_token');
   }
 }
+
