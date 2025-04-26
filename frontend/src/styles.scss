@@ -1,23 +1,14 @@
-/* Standard-Theme */
-* {
+@import "tailwindcss";
+
+html, body {
   margin: 0;
   padding: 0;
+  height: 100svh;
+  font-size: 100%;
+}
+
+* {
   box-sizing: border-box;
+  user-select: none;
 }
 
-body,html {
-  font-family: Inter, sans-serif;
-  transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-.light-theme {
-  background-color: #ffffff;
-  color: #000000;
-}
-
-.dark-theme {
-/*  background-color: #000000;
-  color: #ffffff;*/
-  background-color: #ffffff;
-  color: #000000;
-}
