@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { SlidecontentModel } from '../../../models/slidecontent.model';
+import { SlideContentModel } from '../../../models/slideContent.model';
 
 @Component({
   selector: 'app-slideshow',
@@ -11,5 +11,5 @@ import { SlidecontentModel } from '../../../models/slidecontent.model';
 })
 export class SlideshowComponent {
   @Input() direction: 'left' | 'right' = 'left';
-  @Input() slideShowElements: SlidecontentModel[] = [];
+  @Input() slideShowElements: SlideContentModel[] = [];
 }
