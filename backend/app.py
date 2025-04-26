@@ -101,7 +101,7 @@ def login():
             failed_attempts[ip] += 1
             
             # If reached limit, block the IP
-            if failed_attempts[ip] >= 5:
+            if failed_attempts[ip] >= 10:  # Changed from 5 to 10
                 block_until[ip] = time.time() + (5 * 60)  # 5 minutes block
                 failed_attempts[ip] = 0
                 return make_response(
@@ -115,7 +115,7 @@ def login():
             return make_response(
                 jsonify({
                     'message': 'User not found',
-                    'attempts_remaining': 5 - failed_attempts[ip]
+                    'attempts_remaining': 10 - failed_attempts[ip]  # Changed from 5 to 10
                 }),
                 401
             )
@@ -134,7 +134,7 @@ def login():
         failed_attempts[ip] += 1
         
         # If reached limit, block the IP
-        if failed_attempts[ip] >= 5:
+        if failed_attempts[ip] >= 10:  # Changed from 5 to 10
             block_until[ip] = time.time() + (5 * 60)  # 5 minutes block
             failed_attempts[ip] = 0
             return make_response(
@@ -148,7 +148,7 @@ def login():
         return make_response(
             jsonify({
                 'message': 'Invalid credentials',
-                'attempts_remaining': 5 - failed_attempts[ip]
+                'attempts_remaining': 10 - failed_attempts[ip]  # Changed from 5 to 10
             }),
             401
         )
