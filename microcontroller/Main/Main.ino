@@ -29,6 +29,7 @@ bool armed = true;
 String* access_ids;
 int num_access_ids = 0;
 SensorData lastSensorData;
+bool lastarmed;
 
 //
 struct SensorData {
@@ -462,13 +463,17 @@ void loop() {
   
 
   // Publish Sensor Data to MQTT only if data has changed and config is set
-  if (sensorData != lastSensorData && config.useWifi && WiFi.status() == WL_CONNECTED) {
-    publishMessage("RZ/data", 
-      "{\"tmp\":" + String(sensorData.temperature) + 
-      ", \"lf\":" + String(sensorData.humidity) + 
-      ", \"locked\":" + String(armed) + "}");
+  if (sensorData != lastSensorData | armed != lastarmed) {
+    if (config.useWifi && WiFi.status() == WL_CONNECTED) {
+      publishMessage("RZ/data", 
+        "{\"tmp\":" + String(sensorData.temperature) + 
+        ", \"lf\":" + String(sensorData.humidity) + 
+        ", \"locked\":" + String(armed) + "}");
+    }
   }
+  
   lastSensorData = sensorData;
+  lastarmed = armed;
   //Print Sensor Data to LCD
   lcd->setCursor(0, 0);
   lcd->print("Tmp: " + String(sensorData.temperature) + "C");
@@ -482,6 +487,8 @@ void loop() {
     digitalWrite(config.ledRedPin, LOW);
     digitalWrite(config.ledGreenPin, HIGH);
   }
+
+
   
   if (!mfrc522->PICC_IsNewCardPresent()) {
     return;
