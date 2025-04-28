@@ -28,6 +28,7 @@ const char* ACCESS_IDS_FILE = "/access_ids.json";
 bool armed = true;
 String* access_ids;
 int num_access_ids = 0;
+SensorData lastSensorData;
 
 //
 struct SensorData {
@@ -444,8 +445,31 @@ void setup() {
 }
 
 void loop() {
+
+  // Do main loop tasks
+
+  // Check if WiFi is connected and poll mqtt to stay connected !TODO needs a check for mqtt connection status
+  if (config.useWifi && WiFi.status() != WL_CONNECTED) {
+    connectToWifi(config.ssid, config.password);
+    if (WiFi.status() == WL_CONNECTED) {
+      mqttClient.poll();
+    }
+  }
+
+  //Gather Sensor Data
   SensorData sensorData = readDHTSensor();
   
+  
+
+  // Publish Sensor Data to MQTT only if data has changed and config is set
+  if (sensorData != lastSensorData && config.useWifi && WiFi.status() == WL_CONNECTED) {
+    publishMessage("RZ/data", 
+      "{\"tmp\":" + String(sensorData.temperature) + 
+      ", \"lf\":" + String(sensorData.humidity) + 
+      ", \"locked\":" + String(armed) + "}");
+  }
+  lastSensorData = sensorData;
+  //Print Sensor Data to LCD
   lcd->setCursor(0, 0);
   lcd->print("Tmp: " + String(sensorData.temperature) + "C");
   lcd->setCursor(0, 1);
@@ -458,16 +482,6 @@ void loop() {
     digitalWrite(config.ledRedPin, LOW);
     digitalWrite(config.ledGreenPin, HIGH);
   }
-  
-  if (config.useWifi && WiFi.status() == WL_CONNECTED) {
-    publishMessage("RZ/data", 
-      "{\"tmp\":" + String(sensorData.temperature) + 
-      ", \"lf\":" + String(sensorData.humidity) + 
-      ", \"locked\":" + String(armed) + "}");
-  }
-
-  delay(1000);
-  lcd->clear();
   
   if (!mfrc522->PICC_IsNewCardPresent()) {
     return;
@@ -483,6 +497,7 @@ void loop() {
   if (accessGranted) {
     armed = !armed;
   }
+  lcd->clear();
 }
 
 #pragma endregion
