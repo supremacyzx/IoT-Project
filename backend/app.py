@@ -21,6 +21,7 @@ import time
 from functools import wraps
 from collections import defaultdict
 from mqtt_handler import mqtt_client
+from flask_socketio import SocketIO  
 
 #endregion :: Imports
 
@@ -33,6 +34,11 @@ CORS(app)
 app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY', 'grp5-secret-key-boys')
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=int(os.getenv('JWT_ACCESS_TOKEN_EXPIRES', 12)))
 jwt = JWTManager(app)
+
+#websocket setup
+socketio = SocketIO(app, cors_allowed_origins="*")  # Add CORS support for SocketIO
+
+mqtt_client.socketio = socketio
 
 #Helper Vars for Limiter
 failed_attempts = defaultdict(int)  
@@ -290,7 +296,8 @@ if __name__ == '__main__':
     mqtt_client.start()
     print("MQTT client started and listening for messages")
     port = int(os.getenv('PORT', 5000))
-    app.run(debug=True, host='0.0.0.0', port=port)
+    #app.run(debug=True, host='0.0.0.0', port=port)
+    socketio.run(app, debug=True, host='0.0.0.0', port=port, allow_unsafe_werkzeug=True)
 
 
 #endregion :: __main__
