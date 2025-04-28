@@ -6,12 +6,20 @@ services:
     container_name: mosquitto
     restart: unless-stopped
     ports:
-      - "1883:1883"       # MQTT
+      - "1884:1884"       # MQTT
       - "9001:9001"       # WebSocket (optional)
     volumes:
-      - ./mosquitto/config:/mosquitto/config
+      - ./mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf
       - ./mosquitto/data:/mosquitto/data
       - ./mosquitto/log:/mosquitto/log
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"  
+    volumes:
+      - ./html:/usr/share/nginx/html:ro
+    restart: always
 
 
 
