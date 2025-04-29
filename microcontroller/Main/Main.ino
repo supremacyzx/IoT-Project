@@ -293,9 +293,9 @@ bool saveAccessIds() {
 
 // Function for Access-Sound
 void accessSound(int buzzerPin) {
-  tone(buzzerPin, 950, 300);  // 950 Mhz for 300 ms
+  tone(buzzerPin, 600, 300);  // 950 Mhz for 300 ms
   delay(300);
-  tone(buzzerPin, 950, 300);
+  tone(buzzerPin, 700, 300);
   delay(200);
 }
 
@@ -307,14 +307,36 @@ void denySound(int buzzerPin) {
   delay(300);
 }
 
+
 // Function for Alarm-Sound
 void alarmSound(int buzzerPin) {
     tone(buzzerPin, 1000, 300);  // 1000Mhz for 300 ms
-    delay(0);
     tone(buzzerPin, 300, 300); // 300Mhz for 300ms
-    delay(0);
   }
 
+
+  
+// Function to listen for incoming MQTT messages
+void listenForMessages() {
+  // Check if a message has arrived
+  int messageSize = mqttClient.parseMessage();
+  
+  if (messageSize > 0) {
+    // Message received
+    Serial.print("Received message on topic: ");
+    Serial.println(mqttClient.messageTopic());
+    
+    Serial.print("Message size: ");
+    Serial.println(messageSize);
+    
+    // Read and print the message content
+    Serial.print("Message content: ");
+    while (mqttClient.available()) {
+      Serial.print((char)mqttClient.read());
+    }
+    Serial.println();
+  }
+}
 
 
 SensorData readDHTSensor() {
@@ -398,6 +420,9 @@ void connectToMQTT(const char* broker, const int port, const char* mqttuser, con
     }else{
       Serial.println(String(mqttstatus));
       Serial.println("Connected to broker.");
+      Serial.print("Subscribing to topic: ");
+      Serial.println("RZ/config");
+      mqttClient.subscribe("RZ/config");
       lcd->clear();
       lcd->print("MQTT successful");
       delay(1000);
@@ -503,10 +528,14 @@ void setup() {
 void loop() {
 
   // Do main loop tasks
-
+  listenForMessages();
   //poll mqtt to stay alive
   mqttClient.poll();
-
+  if(mqttClient.connected()==0){
+    Serial.println("MQTT Con lost, reinitiating MQTT");
+    connectToMQTT(config.broker, config.port, config.mqttUser, config.mqttPass);
+  }
+  
   // Check if WiFi is connected and poll mqtt to stay connected !TODO needs a check for mqtt connection status
   if (config.useWifi && WiFi.status() != WL_CONNECTED) {
     connectToWifi(config.ssid, config.password);
