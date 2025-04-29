@@ -47,6 +47,8 @@ struct Config {
   // MQTT Config
   char broker[32];
   int port;
+  char mqttUser[32];
+  char mqttPass[64];
   
   // Pin Configuration
   int ledGreenPin;
@@ -95,6 +97,8 @@ bool loadConfig() {
     strcpy(config.password, "SuS-WLAN!Key24");
     config.useWifi = true;
     strcpy(config.broker, "10.93.136.51");
+    strcpy(config.mqttUser, "grp5");
+    strcpy(config.mqttPass, "grp5");
     config.port = 1883;
     config.ledGreenPin = 22;
     config.ledRedPin = 26;
@@ -129,6 +133,8 @@ bool loadConfig() {
   // Load MQTT settings
   strlcpy(config.broker, doc["mqtt"]["broker"] | "10.93.136.51", sizeof(config.broker));
   config.port = doc["mqtt"]["port"] | 1883;
+  strlcpy(config.mqttUser, doc["mqtt"]["mqttUser"] | "grp5", sizeof(config.mqttUser));
+  strlcpy(config.mqttPass, doc["mqtt"]["mqttPass"] | "grp5123!", sizeof(config.mqttPass));
   
   // Load pin configuration
   config.ledGreenPin = doc["pins"]["ledGreen"] | 22;
@@ -167,6 +173,8 @@ bool saveConfig() {
   JsonObject mqtt = doc.createNestedObject("mqtt");
   mqtt["broker"] = config.broker;
   mqtt["port"] = config.port;
+  mqtt["mqttUser"] = config.mqttUser;
+  mqtt["mqttPass"] = config.mqttPass;
   
   // Pin configuration
   JsonObject pins = doc.createNestedObject("pins");
@@ -328,9 +336,10 @@ bool checkAccess(String id) {
   return false; // ID not found
 }
 
-void connectToMQTT(const char* broker, const int port) {
+void connectToMQTT(const char* broker, const int port, const char* mqttuser, const char* mqttpass) {
   // Connect to the MQTT broker
   Serial.println("Connecting to MQTT Broker..");
+  mqttClient.setUsernamePassword(mqttuser, mqttpass);
   lcd->clear();
   lcd->print("Init MQTT..");
   int attempts = 0;
@@ -440,7 +449,7 @@ void setup() {
   if (config.useWifi) {
     connectToWifi(config.ssid, config.password);
     if (WiFi.status() == WL_CONNECTED) {
-      connectToMQTT(config.broker, config.port);
+      connectToMQTT(config.broker, config.port, config.mqttUser, config.mqttPass);
     }
   }
 }
