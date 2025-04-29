@@ -20,6 +20,11 @@
 
 #pragma region :: Constants / Definitions / Config
 
+struct SensorData {
+  float temperature;
+  float humidity;
+};
+
 // File paths for configuration
 const char* CONFIG_FILE = "/config.json";
 const char* ACCESS_IDS_FILE = "/access_ids.json";
@@ -32,10 +37,7 @@ SensorData lastSensorData;
 bool lastarmed;
 
 //
-struct SensorData {
-  float temperature;
-  float humidity;
-};
+
 
 // Configuration variables - will be loaded from LittleFS
 struct Config {
@@ -96,10 +98,10 @@ bool loadConfig() {
     strcpy(config.ssid, "FES-SuS");
     strcpy(config.password, "SuS-WLAN!Key24");
     config.useWifi = true;
-    strcpy(config.broker, "10.93.136.51");
+    strcpy(config.broker, "10.93.140.165");
     strcpy(config.mqttUser, "grp5");
-    strcpy(config.mqttPass, "grp5");
-    config.port = 1883;
+    strcpy(config.mqttPass, "grp5123!");
+    config.port = 1884;
     config.ledGreenPin = 22;
     config.ledRedPin = 26;
     config.dhtPin = 25;
@@ -131,7 +133,7 @@ bool loadConfig() {
   config.useWifi = doc["wifi"]["enabled"] | true;
   
   // Load MQTT settings
-  strlcpy(config.broker, doc["mqtt"]["broker"] | "10.93.136.51", sizeof(config.broker));
+  strlcpy(config.broker, doc["mqtt"]["broker"] | "10.93.140.165", sizeof(config.broker));
   config.port = doc["mqtt"]["port"] | 1883;
   strlcpy(config.mqttUser, doc["mqtt"]["mqttUser"] | "grp5", sizeof(config.mqttUser));
   strlcpy(config.mqttPass, doc["mqtt"]["mqttPass"] | "grp5123!", sizeof(config.mqttPass));
@@ -316,10 +318,17 @@ String readCard() {
   return uidString;
 }
 
-bool checkAccess(String id) {
+bool checkAccess(String id, bool armed) {
   Serial.println(id);
   for(int i = 0; i < num_access_ids; i++) {
     if(access_ids[i] == id) {
+      if (!armed) {
+        digitalWrite(config.ledGreenPin, LOW);
+        digitalWrite(config.ledRedPin, HIGH);
+      } else {
+        digitalWrite(config.ledRedPin, LOW);
+        digitalWrite(config.ledGreenPin, HIGH);
+      }
       lcd->clear();
       lcd->print("Access granted");
       delay(1000);
@@ -342,6 +351,10 @@ void connectToMQTT(const char* broker, const int port, const char* mqttuser, con
   mqttClient.setUsernamePassword(mqttuser, mqttpass);
   lcd->clear();
   lcd->print("Init MQTT..");
+  lcd->setCursor(0, 1);
+  lcd->print(String(broker));
+  lcd->setCursor(0, 0);
+  Serial.println("Connecting MQTT to: " + String(mqttuser) + "@" + String(broker) + ":" + String(port));
   int attempts = 0;
   while (attempts < 50) {
     int mqttstatus = mqttClient.connect(broker, port);
@@ -475,11 +488,19 @@ void loop() {
   
 
   // Publish Sensor Data to MQTT only if data has changed 
-  if (sensorData != lastSensorData || armed != lastarmed) {
+  if ((sensorData.temperature != lastSensorData.temperature || sensorData.humidity != lastSensorData.humidity) || armed != lastarmed) {
       publishMessage("RZ/data", 
         "{\"tmp\":" + String(sensorData.temperature) + 
         ", \"lf\":" + String(sensorData.humidity) + 
         ", \"locked\":" + String(armed) + "}");
+
+      //clear screen for new loop
+      lcd->clear();
+      lcd->setCursor(0, 0);
+      lcd->print("Tmp: " + String(sensorData.temperature) + "C");
+      lcd->setCursor(0, 1);
+      lcd->print("LF: " + String(sensorData.humidity) + "%");
+
     }
   
   
@@ -487,10 +508,7 @@ void loop() {
   lastSensorData = sensorData;
   lastarmed = armed;
   //Print Sensor Data to LCD
-  lcd->setCursor(0, 0);
-  lcd->print("Tmp: " + String(sensorData.temperature) + "C");
-  lcd->setCursor(0, 1);
-  lcd->print("LF: " + String(sensorData.humidity) + "%");
+  
 
   //check armed status and set Status LED 
 
@@ -502,8 +520,7 @@ void loop() {
     digitalWrite(config.ledGreenPin, HIGH);
   }
 
-  //clear screen for new loop
-  lcd->clear();
+  
 
   //check rfid card presence and return early if no card is present
   if (!mfrc522->PICC_IsNewCardPresent()) {
@@ -517,10 +534,15 @@ void loop() {
   
   //read card and check access, adjust armed status
   String cardID = readCard();
-  bool accessGranted = checkAccess(cardID);
+  bool accessGranted = checkAccess(cardID, armed);
   if (accessGranted) {
     armed = !armed;
   }
+  lcd->clear();
+  lcd->setCursor(0, 0);
+  lcd->print("Tmp: " + String(sensorData.temperature) + "C");
+  lcd->setCursor(0, 1);
+  lcd->print("LF: " + String(sensorData.humidity) + "%");
   
 }
 
