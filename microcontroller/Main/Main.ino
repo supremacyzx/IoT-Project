@@ -458,11 +458,14 @@ void loop() {
 
   // Do main loop tasks
 
+  //poll mqtt to stay alive
+  mqttClient.poll();
+
   // Check if WiFi is connected and poll mqtt to stay connected !TODO needs a check for mqtt connection status
   if (config.useWifi && WiFi.status() != WL_CONNECTED) {
     connectToWifi(config.ssid, config.password);
     if (WiFi.status() == WL_CONNECTED) {
-      mqttClient.poll();
+      
     }
   }
 
@@ -471,16 +474,16 @@ void loop() {
   
   
 
-  // Publish Sensor Data to MQTT only if data has changed and config is set
-  if (sensorData != lastSensorData | armed != lastarmed) {
-    if (config.useWifi && WiFi.status() == WL_CONNECTED) {
+  // Publish Sensor Data to MQTT only if data has changed 
+  if (sensorData != lastSensorData || armed != lastarmed) {
       publishMessage("RZ/data", 
         "{\"tmp\":" + String(sensorData.temperature) + 
         ", \"lf\":" + String(sensorData.humidity) + 
         ", \"locked\":" + String(armed) + "}");
     }
-  }
   
+  
+  //reset / set last data 
   lastSensorData = sensorData;
   lastarmed = armed;
   //Print Sensor Data to LCD
@@ -488,6 +491,8 @@ void loop() {
   lcd->print("Tmp: " + String(sensorData.temperature) + "C");
   lcd->setCursor(0, 1);
   lcd->print("LF: " + String(sensorData.humidity) + "%");
+
+  //check armed status and set Status LED 
 
   if (armed) {
     digitalWrite(config.ledGreenPin, LOW);
@@ -497,23 +502,26 @@ void loop() {
     digitalWrite(config.ledGreenPin, HIGH);
   }
 
+  //clear screen for new loop
+  lcd->clear();
 
-  
+  //check rfid card presence and return early if no card is present
   if (!mfrc522->PICC_IsNewCardPresent()) {
     return;
   }
 
-  // Select one of the cards.
+  // select card if card is present, return if unreadable
   if (!mfrc522->PICC_ReadCardSerial()) {
     return;
   }
   
+  //read card and check access, adjust armed status
   String cardID = readCard();
   bool accessGranted = checkAccess(cardID);
   if (accessGranted) {
     armed = !armed;
   }
-  lcd->clear();
+  
 }
 
 #pragma endregion
