@@ -35,7 +35,7 @@ String* access_ids;
 int num_access_ids = 0;
 SensorData lastSensorData;
 bool lastarmed;
-
+bool alarming = false;
 //
 
 
@@ -59,6 +59,7 @@ struct Config {
   int rfidSSPin;
   int sdaPin;
   int sclPin;
+  int buzzerpin;
   
   // Sensor Configuration
   int dhtType;
@@ -92,7 +93,7 @@ bool initFS() {
 
 bool loadConfig() {
   File configFile = LittleFS.open(CONFIG_FILE, "r");
-  if (!configFile) {
+  if (configFile) {
     Serial.println("Failed to open config file, using defaults");
     // Set default values
     strcpy(config.ssid, "FES-SuS");
@@ -105,6 +106,7 @@ bool loadConfig() {
     config.ledGreenPin = 22;
     config.ledRedPin = 26;
     config.dhtPin = 25;
+    config.buzzerpin = 27;
     config.dhtType = DHT11;
     config.rfidSSPin = 13;
     config.sdaPin = 15;
@@ -134,7 +136,7 @@ bool loadConfig() {
   
   // Load MQTT settings
   strlcpy(config.broker, doc["mqtt"]["broker"] | "10.93.140.165", sizeof(config.broker));
-  config.port = doc["mqtt"]["port"] | 1883;
+  config.port = doc["mqtt"]["port"] | 1884;
   strlcpy(config.mqttUser, doc["mqtt"]["mqttUser"] | "grp5", sizeof(config.mqttUser));
   strlcpy(config.mqttPass, doc["mqtt"]["mqttPass"] | "grp5123!", sizeof(config.mqttPass));
   
@@ -145,6 +147,7 @@ bool loadConfig() {
   config.rfidSSPin = doc["pins"]["rfidSS"] | 13;
   config.sdaPin = doc["pins"]["sda"] | 15;
   config.sclPin = doc["pins"]["scl"] | 14;
+  config.buzzerpin = doc["pins"]["buzzerpin"] | 27;
   
   // Load sensor configuration
   config.dhtType = doc["sensors"]["dhtType"] | DHT11;
@@ -186,6 +189,7 @@ bool saveConfig() {
   pins["rfidSS"] = config.rfidSSPin;
   pins["sda"] = config.sdaPin;
   pins["scl"] = config.sclPin;
+  pins["buzzerpin"] = config.buzzerpin;
   
   // Sensor configuration
   JsonObject sensors = doc.createNestedObject("sensors");
@@ -287,6 +291,32 @@ bool saveAccessIds() {
 #pragma region :: Custom Methods
 
 
+// Function for Access-Sound
+void accessSound(int buzzerPin) {
+  tone(buzzerPin, 950, 300);  // 950 Mhz for 300 ms
+  delay(300);
+  tone(buzzerPin, 950, 300);
+  delay(200);
+}
+
+// Function for Deny-Sound
+void denySound(int buzzerPin) {
+  tone(buzzerPin, 300, 300);  // 300 Mhz for 300 ms
+  delay(0);
+  tone(buzzerPin, 200, 400);  // 200Mhz for 200 ms
+  delay(300);
+}
+
+// Function for Alarm-Sound
+void alarmSound(int buzzerPin) {
+    tone(buzzerPin, 1000, 300);  // 1000Mhz for 300 ms
+    delay(0);
+    tone(buzzerPin, 300, 300); // 300Mhz for 300ms
+    delay(0);
+  }
+
+
+
 SensorData readDHTSensor() {
   SensorData data;
 
@@ -331,6 +361,7 @@ bool checkAccess(String id, bool armed) {
       }
       lcd->clear();
       lcd->print("Access granted");
+      accessSound(config.buzzerpin);
       delay(1000);
       lcd->clear();
       Serial.println("Access granted");
@@ -340,6 +371,7 @@ bool checkAccess(String id, bool armed) {
   Serial.println("Access denied");
   lcd->clear();
   lcd->print("Access denied");
+  denySound(config.buzzerpin);
   delay(1000);
   lcd->clear();
   return false; // ID not found
@@ -434,6 +466,7 @@ void initComponents() {
   // Initialize pins
   pinMode(config.ledGreenPin, OUTPUT);          
   pinMode(config.ledRedPin, OUTPUT);
+  pinMode(config.buzzerpin, OUTPUT);
 }
 
 #pragma endregion
@@ -502,7 +535,9 @@ void loop() {
       lcd->print("LF: " + String(sensorData.humidity) + "%");
 
     }
-  
+  if (alarming){
+    alarmSound(config.buzzerpin);
+  }
   
   //reset / set last data 
   lastSensorData = sensorData;
