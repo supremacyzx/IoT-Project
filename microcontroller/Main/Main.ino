@@ -390,7 +390,7 @@ void listenForMessages() {
       return;
     }
 
-    if (docmessage.containsKey("command")) {
+    if (docmessage.containsKey("command") && docmessage.containsKey("msgID")) {
       String command = docmessage["command"];
       // Do something with the command
       Serial.print("Received command: ");
@@ -398,7 +398,7 @@ void listenForMessages() {
       if (command == "getConfig"){
         String configString = getConfigAsString();
         Serial.println(configString);
-        String mqttMsg = '{"command":"sendConfig", "value":' + configString + '}';
+        String mqttMsg = '{"msgID":' + String(docmessage["msgID"]) + ',"command":"sendConfig", "value":' + configString + '}';
         publishMessage("RZ/config", mqttMsg);
         Serial.println("Sent config to RZ/config");
       }

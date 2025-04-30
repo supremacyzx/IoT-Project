@@ -11,6 +11,7 @@ from flask import Flask, jsonify, request, make_response
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
 from flask_cors import CORS
 import sqlite3
+import random
 from datetime import datetime, timedelta
 from werkzeug.security import check_password_hash
 import json
@@ -165,6 +166,25 @@ def login():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
     
+
+@app.route('/getConfig', methods=['GET'])
+@jwt_required()
+def get_config():
+    try:
+        msgID = random.randint(0,100000)
+        mqtt_client.send_message("RZ/data", r'{"command":"getConfig", "msgID":' + str(msgID) + '}')
+        attempts = 0
+        while True:
+            if attempts >= 200:
+                return jsonify({'error': 'Timeout waiting for MQTT msg'}), 500
+            if mqtt_client.configData["msgID"] == msgID:
+                return mqtt_client.configData
+            attempts += 1
+            time.sleep(0.1)
+
+    except Exception as e:
+        print("Error in API: ", e)
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/data', methods=['GET'])
 @jwt_required()

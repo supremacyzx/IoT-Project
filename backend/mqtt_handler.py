@@ -29,6 +29,7 @@ DATABASE = os.path.join(BASE_DIR, DB_PATH)
 
 class MQTTClient:
     def __init__(self, socketio=None):
+        self.configData = ""
         self.display_data = []
         self.hidden_data = []
         self.client = mqtt.Client()
@@ -47,6 +48,16 @@ class MQTTClient:
         client.subscribe(MQTT_TOPIC_DATA)
         client.subscribe(MQTT_TOPIC_INCIDENTS)
         client.subscribe(MQTT_TOPIC_CONFIG)
+
+    def send_message(self, topic, msg):
+        try:
+            result = self.client.publish(topic, msg, qos=0, retain=False)
+            result.wait_for_publish()
+            print("Sent msg: " + msg + " to " + topic)
+            return True
+        except Exception as e:
+            return False
+        
 
     def on_message(self, client, userdata, msg):
         if msg.topic == MQTT_TOPIC_DATA:
@@ -76,7 +87,11 @@ class MQTTClient:
             except Exception as e:
                 print(f"Error processing MQTT message: {e}")
         elif msg.topic == MQTT_TOPIC_CONFIG:
-            return None
+            try:
+                data = json.loads(msg.payload.decode())
+                self.configData = data
+            except Exception as e:
+                print("Error parsing config: ", e)
         elif msg.topic == MQTT_TOPIC_INCIDENTS:
             return None
         else:
