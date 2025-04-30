@@ -24,7 +24,7 @@ DB_INSERT_INTERVAL = int(os.getenv('DB_INSERT_INTERVAL', 30))  # seconds
 # Database setup
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATABASE = os.path.join(BASE_DIR, DB_PATH)
-lastData = None
+
 
 class MQTTClient:
     def __init__(self, socketio=None):
@@ -35,7 +35,7 @@ class MQTTClient:
         self.client.on_connect = self.on_connect
         self.client.on_message = self.on_message
         self.socketio = socketio  # Store the socketio instance
-
+        self.lastData = None
         self.latest_data = {
             "tmp": None,
             "lf": None,
@@ -50,7 +50,7 @@ class MQTTClient:
         try:
             data = json.loads(msg.payload.decode())
             data_updated = False
-            if data != lastData:
+            if data != self.lastData:
                 self._insert_into_db(data) #only insert if data is different
                 print(f"Received data: {data}")
 
@@ -68,7 +68,7 @@ class MQTTClient:
             if data_updated and self.socketio:
                 self.socketio.emit('mqtt_data', self.latest_data)
             
-            lastData = data
+            self.lastData = data
             self.latest_data["last_insert"] = time.time()
         except Exception as e:
             print(f"Error processing MQTT message: {e}")
