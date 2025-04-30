@@ -1,9 +1,9 @@
 Flask
 Flask-Login
-Flask-SocketIO
 Flask-Cors
 python-dotenv
 paho-mqtt
 flask-jwt-extended
 werkzeug
 flask_limiter
+flask-sock

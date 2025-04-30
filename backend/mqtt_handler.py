@@ -38,6 +38,7 @@ class MQTTClient:
         self.client.on_message = self.on_message
         self.socketio = socketio  # Store the socketio instance
         self.lastData = None
+        self.ws_bridge = None
         self.latest_data = {
             "tmp": None,
             "lf": None,
@@ -79,8 +80,13 @@ class MQTTClient:
                     data_updated = True
                 
                 # Emit the updated data to all connected clients
-                if data_updated and self.socketio:
-                    self.socketio.emit('mqtt_data', self.latest_data)
+                if data_updated:
+                     if hasattr(self, 'ws_bridge') and self.ws_bridge is not None:
+                        self.ws_bridge.broadcast_message({
+                            "topic": msg.topic,
+                            "payload": data,
+                            "timestamp": time.time()
+                        })
                 
                 self.lastData = data
                 self.latest_data["last_insert"] = time.time()
