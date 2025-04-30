@@ -89,7 +89,8 @@ class MQTTClient:
         elif msg.topic == MQTT_TOPIC_CONFIG:
             try:
                 data = json.loads(msg.payload.decode())
-                self.configData = data
+                if data["command"] == "sendConfig":
+                    self.configData = data
             except Exception as e:
                 print("Error parsing config: ", e)
         elif msg.topic == MQTT_TOPIC_INCIDENTS:
