@@ -28,7 +28,7 @@ from flask_socketio import SocketIO
 #region :: Environment Variables / Var Setup
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/socket.io/*": {"origins": "*"}})
 
 # JWT Configuration
 app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY', 'grp5-secret-key-boys')
@@ -36,7 +36,12 @@ app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=int(os.getenv('JWT_ACCE
 jwt = JWTManager(app)
 
 #websocket setup
-socketio = SocketIO(app, cors_allowed_origins="*")  # Add CORS support for SocketIO
+socketio = SocketIO(app, 
+                   cors_allowed_origins="*",  # Or specific origins
+                   async_mode='eventlet',     # Try different async modes
+                   logger=True,               # For debugging
+                   engineio_logger=True)      # For more detailed logs
+
 
 mqtt_client.socketio = socketio
 
