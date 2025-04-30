@@ -4,7 +4,7 @@
 
 #pragma region :: Lib Imports
 
-#include <ArduinoMqttClient.h>
+#include <ArduinoMqttClient.h> //Had to adjust the cpp of this lib to allow bigger mqtt msgs
 #include <WiFi.h>
 #include <DHT.h>
 #include <MFRC522v2.h>
@@ -36,7 +36,7 @@ int num_access_ids = 0;
 SensorData lastSensorData;
 bool lastarmed;
 bool alarming = false;
-//
+
 
 
 // Configuration variables - will be loaded from LittleFS
@@ -51,6 +51,7 @@ struct Config {
   int port;
   char mqttUser[32];
   char mqttPass[64];
+  char mqttID[32];
   
   // Pin Configuration
   int ledGreenPin;
@@ -114,6 +115,7 @@ bool loadConfig() {
     config.lcdAddress = 0x27;
     config.lcdCols = 16;
     config.lcdRows = 2;
+    strcpy(config.mqttID, "Arduino--001");
     
     // Save default config
     saveConfig();
@@ -139,7 +141,7 @@ bool loadConfig() {
   config.port = doc["mqtt"]["port"] | 1884;
   strlcpy(config.mqttUser, doc["mqtt"]["mqttUser"] | "grp5", sizeof(config.mqttUser));
   strlcpy(config.mqttPass, doc["mqtt"]["mqttPass"] | "grp5123!", sizeof(config.mqttPass));
-  
+  strlcpy(config.mqttID, doc["mqtt"]["mqttID"] | "Arduino-001", sizeof(config.mqttID));
   // Load pin configuration
   config.ledGreenPin = doc["pins"]["ledGreen"] | 22;
   config.ledRedPin = doc["pins"]["ledRed"] | 26;
@@ -180,7 +182,7 @@ bool saveConfig() {
   mqtt["port"] = config.port;
   mqtt["mqttUser"] = config.mqttUser;
   mqtt["mqttPass"] = config.mqttPass;
-  
+  mqtt["mqttID"] = config.mqttID;
   // Pin configuration
   JsonObject pins = doc.createNestedObject("pins");
   pins["ledGreen"] = config.ledGreenPin;
@@ -225,7 +227,7 @@ String getConfigAsString() {
   mqtt["port"] = config.port;
   mqtt["mqttUser"] = config.mqttUser;
   mqtt["mqttPass"] = config.mqttPass;
-  
+  mqtt["mqttID"] = config.mqttID;
   // Pin configuration
   JsonObject pins = doc.createNestedObject("pins");
   pins["ledGreen"] = config.ledGreenPin;
@@ -395,7 +397,9 @@ void listenForMessages() {
       Serial.println(command);
       if (command == "getConfig"){
         String configString = getConfigAsString();
-        publishMessage("RZ/config", configString);
+        Serial.println(configString);
+        String mqttMsg = '{"command":"sendConfig", "value":' + configString + '}';
+        publishMessage("RZ/config", mqttMsg);
         Serial.println("Sent config to RZ/config");
       }
     }

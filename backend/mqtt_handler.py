@@ -18,6 +18,7 @@ MQTT_PASS = os.getenv('MQTT_PASS', "grp5123!")
 MQTT_KEEPALIVE = int(os.getenv('MQTT_KEEPALIVE', 60))
 MQTT_TOPIC_DATA = os.getenv('MQTT_TOPIC_DATA', 'RZ/data')
 MQTT_TOPIC_INCIDENTS = os.getenv('MQTT_TOPIC_INCIDENTS', 'RZ/incidents')
+MQTT_TOPIC_CONFIG = os.getenv('MQTT_TOPIC_CONFIG', 'RZ/config')
 DB_PATH = os.getenv('DB_PATH', 'local.db')
 DB_INSERT_INTERVAL = int(os.getenv('DB_INSERT_INTERVAL', 30))  # seconds
 
@@ -45,33 +46,41 @@ class MQTTClient:
     def on_connect(self, client, userdata, flags, rc):
         client.subscribe(MQTT_TOPIC_DATA)
         client.subscribe(MQTT_TOPIC_INCIDENTS)
+        client.subscribe(MQTT_TOPIC_CONFIG)
 
     def on_message(self, client, userdata, msg):
-        try:
-            data = json.loads(msg.payload.decode())
-            data_updated = False
-            if data != self.lastData:
-                self._insert_into_db(data) #only insert if data is different
-                print(f"Received data: {data}")
+        if msg.topic == MQTT_TOPIC_DATA:
+            try:
+                data = json.loads(msg.payload.decode())
+                data_updated = False
+                if data != self.lastData:
+                    self._insert_into_db(data) #only insert if data is different
+                    print(f"Received data: {data}")
 
-            if "tmp" in data:
-                self.latest_data["tmp"] = data["tmp"]
-                data_updated = True
-            if "lf" in data:
-                self.latest_data["lf"] = data["lf"]
-                data_updated = True
-            if "locked" in data:
-                self.latest_data["locked"] = data["locked"]
-                data_updated = True
-            
-            # Emit the updated data to all connected clients
-            if data_updated and self.socketio:
-                self.socketio.emit('mqtt_data', self.latest_data)
-            
-            self.lastData = data
-            self.latest_data["last_insert"] = time.time()
-        except Exception as e:
-            print(f"Error processing MQTT message: {e}")
+                if "tmp" in data:
+                    self.latest_data["tmp"] = data["tmp"]
+                    data_updated = True
+                if "lf" in data:
+                    self.latest_data["lf"] = data["lf"]
+                    data_updated = True
+                if "locked" in data:
+                    self.latest_data["locked"] = data["locked"]
+                    data_updated = True
+                
+                # Emit the updated data to all connected clients
+                if data_updated and self.socketio:
+                    self.socketio.emit('mqtt_data', self.latest_data)
+                
+                self.lastData = data
+                self.latest_data["last_insert"] = time.time()
+            except Exception as e:
+                print(f"Error processing MQTT message: {e}")
+        elif msg.topic == MQTT_TOPIC_CONFIG:
+            return None
+        elif msg.topic == MQTT_TOPIC_INCIDENTS:
+            return None
+        else:
+            return None
 
     def _insert_into_db(self, data):
         try:
