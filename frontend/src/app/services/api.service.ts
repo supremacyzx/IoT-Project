@@ -9,7 +9,7 @@ interface DataItem {
   data: any;
 }
 
-interface DataResponse {
+export interface DataResponse {
   data: DataItem[];
 }
 
@@ -36,6 +36,7 @@ export class ApiService {
   private baseUrl = 'http://localhost:5000';
   private healthUrl = `${this.baseUrl}/health`;
   private tokenKey = 'auth_token';
+  
 
   // Signal für den Gesundheitsstatus des Backends
   isBackendHealthy = signal<boolean>(false);

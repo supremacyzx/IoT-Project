@@ -1,13 +1,11 @@
 import { HttpHandlerFn, HttpInterceptorFn, HttpRequest } from '@angular/common/http';
-import { inject } from '@angular/core';
-import {ApiService} from '../services/api.service';
 
 export const authInterceptor: HttpInterceptorFn = (
   req: HttpRequest<unknown>,
   next: HttpHandlerFn
 ) => {
-  const apiService = inject(ApiService);
-  const token = apiService.getToken();
+  const tokenKey = 'auth_token';
+  const token = localStorage.getItem(tokenKey);
 
   // Wenn kein Token vorhanden ist oder es sich um eine Login-Anfrage handelt, sende die Anfrage ohne Token
   if (!token || req.url.includes('/login') || req.url.includes('/health')) {

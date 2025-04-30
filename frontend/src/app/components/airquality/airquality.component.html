@@ -1,17 +1,11 @@
-@for (airQuality of airQualityData; track airQuality.sensorId)
-{
-  <div class="air-quality-card">
-    <h3>Sensor ID: {{ airQuality.sensorId }}</h3>
-    <p>Location: {{ airQuality.roomName }}</p>
-    <p>Temperature: {{ airQuality.temperature }}</p>
-    <p>Humidity: {{ airQuality.humidity }}</p>
-    <p>Last Update: {{ airQuality.lastUpdate }}</p>
-  </div>
-} @empty {
-  <li>
-    <h3>Keine Daten verfügbar</h3>
-    <p>Bitte überprüfen Sie Ihre Sensoren.</p>
-  </li>
-}
+<section>
+  <h2>Luftqualitätsdaten</h2>
 
-<!-- https://angular.dev/api/core/@for# -->
+  <div *ngIf="airQualityData; else loading">
+    <pre>{{ airQualityData | json }}</pre>
+  </div>
+
+  <ng-template #loading>
+    <p>Lade Daten...</p>
+  </ng-template>
+</section>
