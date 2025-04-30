@@ -295,7 +295,7 @@ bool saveAccessIds() {
 void accessSound(int buzzerPin) {
   tone(buzzerPin, 600, 300);  // 950 Mhz for 300 ms
   delay(300);
-  tone(buzzerPin, 700, 300);
+  tone(buzzerPin, 800, 300);
   delay(200);
 }
 
@@ -335,6 +335,26 @@ void listenForMessages() {
       Serial.print((char)mqttClient.read());
     }
     Serial.println();
+    StaticJsonDocument<200> docmessage;
+    String jsonString = Serial.readStringUntil('\n');
+    DeserializationError error = deserializeJson(docmessage, jsonString);
+    
+    if (error) {
+      Serial.print("deserializeJson() failed: ");
+      Serial.println(error.c_str());
+      return;
+    }
+
+    if (docmessage.containsKey("command")) {
+      String command = docmessage["command"];
+      // Do something with the command
+      Serial.print("Received command: ");
+      Serial.println(command);
+      if (command == "getConfig"){
+        publishMessage("RZ/config", String(config));
+        Serial.println("Sent config to RZ/config");
+      }
+    }
   }
 }
 
