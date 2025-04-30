@@ -172,13 +172,13 @@ def login():
 def get_config():
     try:
         msgID = random.randint(0,100000)
-        mqtt_client.send_message("RZ/data", r'{"command":"getConfig", "msgID":' + str(msgID) + '}')
+        mqtt_client.send_message("RZ/config", r'{"command":"getConfig", "msgID":' + str(msgID) + '}')
         attempts = 0
         while True:
             if attempts >= 200:
                 return jsonify({'error': 'Timeout waiting for MQTT msg'}), 500
-            if mqtt_client.configData["msgID"] == msgID:
-                return mqtt_client.configData
+            if json.loads(mqtt_client.configData)["msgID"] == msgID:
+                return json.loads(mqtt_client.configData)
             attempts += 1
             time.sleep(0.1)
 
