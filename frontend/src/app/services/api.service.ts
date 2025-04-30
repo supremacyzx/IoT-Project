@@ -3,6 +3,7 @@ import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http'
 import { Observable, catchError, tap, throwError } from 'rxjs';
 import { LoginResponse, LoginRequest } from '../../models/login.model';
 import { HealthResponse } from '../../models/health.model';
+import { io, Socket } from 'socket.io-client';
 
 interface DataItem {
   timestamp: string;
@@ -36,7 +37,7 @@ export class ApiService {
   private baseUrl = 'http://localhost:5000';
   private healthUrl = `${this.baseUrl}/health`;
   private tokenKey = 'auth_token';
-  
+  private socket: Socket | null = null;
 
   // Signal für den Gesundheitsstatus des Backends
   isBackendHealthy = signal<boolean>(false);
@@ -44,12 +45,22 @@ export class ApiService {
   connectionError = signal<string | null>(null);
   isAuthenticated = signal<boolean>(false);
 
+  // WebSocket-bezogene Signals
+  isSocketConnected = signal<boolean>(false);
+  lastSocketMessage = signal<any>(null);
+  realtimeData = signal<DataItem[]>([]);
+
   constructor(private http: HttpClient) {
     // Initial health check beim Start
     this.checkHealth().subscribe();
 
     // Prüfen, ob bereits ein Token vorhanden ist
     this.isAuthenticated.set(this.getToken() !== null);
+
+    // Automatische WebSocket-Verbindung, wenn bereits authentifiziert
+    if (this.isAuthenticated()) {
+      this.connectWebSocket();
+    }
   }
 
   /**
@@ -94,6 +105,8 @@ export class ApiService {
       tap(response => {
         this.saveToken(response.access_token);
         this.isAuthenticated.set(true);
+        // WebSocket-Verbindung nach erfolgreicher Anmeldung herstellen
+        this.connectWebSocket();
       }),
       catchError((error: HttpErrorResponse) => {
         this.isAuthenticated.set(false);
@@ -108,6 +121,8 @@ export class ApiService {
   logout(): void {
     localStorage.removeItem(this.tokenKey);
     this.isAuthenticated.set(false);
+    // WebSocket-Verbindung beim Logout trennen
+    this.disconnectWebSocket();
   }
 
   /**
@@ -189,5 +204,107 @@ export class ApiService {
   getToken(): string | null {
     return localStorage.getItem(this.tokenKey);
   }
-}
 
+  /**
+   * Stellt eine WebSocket-Verbindung zum Backend her
+   */
+  connectWebSocket(): void {
+    if (this.socket) {
+      this.disconnectWebSocket(); // Bestehende Verbindung trennen, falls vorhanden
+    }
+
+    const token = this.getToken();
+    if (!token) {
+      console.error('Keine Authentifizierung für WebSocket-Verbindung');
+      return;
+    }
+
+    this.socket = io(this.baseUrl, {
+      auth: {
+        token
+      },
+      transports: ['websocket', 'polling']
+    });
+
+    this.socket.on('connect', () => {
+      console.log('WebSocket verbunden');
+      this.isSocketConnected.set(true);
+    });
+
+    this.socket.on('disconnect', () => {
+      console.log('WebSocket getrennt');
+      this.isSocketConnected.set(false);
+    });
+
+    this.socket.on('connect_error', (error) => {
+      console.error('WebSocket Verbindungsfehler:', error);
+      this.isSocketConnected.set(false);
+    });
+
+    // Standard-Events abonnieren
+    this.subscribeToDataUpdates();
+    this.subscribeToIncidents();
+  }
+
+  /**
+   * Trennt die WebSocket-Verbindung
+   */
+  disconnectWebSocket(): void {
+    if (this.socket) {
+      this.socket.disconnect();
+      this.socket = null;
+      this.isSocketConnected.set(false);
+    }
+  }
+
+  /**
+   * Abonniert Echtzeit-Daten-Updates vom Server
+   */
+  private subscribeToDataUpdates(): void {
+    if (!this.socket) return;
+
+    this.socket.on('data_update', (data) => {
+      this.lastSocketMessage.set(data);
+
+      // Aktuelle Daten aktualisieren und an den Anfang stellen
+      const updatedData = [...this.realtimeData()];
+      updatedData.unshift({
+        timestamp: new Date().toISOString(),
+        data
+      });
+
+      // Begrenze die Anzahl der gespeicherten Einträge (z.B. auf die letzten 50)
+      if (updatedData.length > 50) {
+        updatedData.pop();
+      }
+
+      this.realtimeData.set(updatedData);
+    });
+  }
+
+  /**
+   * Abonniert Echtzeit-Vorfallsmeldungen vom Server
+   */
+  private subscribeToIncidents(): void {
+    if (!this.socket) return;
+
+    this.socket.on('incident', (incident) => {
+      console.log('Neuer Vorfall empfangen:', incident);
+      // Hier könnten weitere Aktionen bei neuen Vorfällen ausgeführt werden
+    });
+  }
+
+  /**
+   * Sendet Daten über WebSocket an den Server
+   * @param event Event-Name
+   * @param data Zu sendende Daten
+   */
+  sendSocketMessage(event: string, data: any): void {
+    if (!this.socket || !this.isSocketConnected()) {
+      console.error('Keine aktive WebSocket-Verbindung');
+      return;
+    }
+
+    this.socket.emit(event, data);
+  }
+}
