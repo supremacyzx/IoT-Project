@@ -37,8 +37,7 @@ jwt = JWTManager(app)
 
 #websocket setup
 socketio = SocketIO(app, 
-                   cors_allowed_origins="*",  # Or specific origins
-                   async_mode='eventlet',     # Try different async modes
+                   cors_allowed_origins="*",  # Or specific origins    # Try different async modes
                    logger=True,               # For debugging
                    engineio_logger=True)      # For more detailed logs
 
