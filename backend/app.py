@@ -28,7 +28,7 @@ from flask_socketio import SocketIO
 #region :: Environment Variables / Var Setup
 
 app = Flask(__name__)
-CORS(app, resources={r"/socket.io/*": {"origins": "*"}})
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 # JWT Configuration
 app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY', 'grp5-secret-key-boys')
