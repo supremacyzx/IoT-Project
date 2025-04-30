@@ -209,6 +209,48 @@ bool saveConfig() {
   return true;
 }
 
+String getConfigAsString() {
+
+  StaticJsonDocument<512> doc;
+  
+  // WiFi settings
+  JsonObject wifi = doc.createNestedObject("wifi");
+  wifi["ssid"] = config.ssid;
+  wifi["password"] = config.password;
+  wifi["enabled"] = config.useWifi;
+  
+  // MQTT settings
+  JsonObject mqtt = doc.createNestedObject("mqtt");
+  mqtt["broker"] = config.broker;
+  mqtt["port"] = config.port;
+  mqtt["mqttUser"] = config.mqttUser;
+  mqtt["mqttPass"] = config.mqttPass;
+  
+  // Pin configuration
+  JsonObject pins = doc.createNestedObject("pins");
+  pins["ledGreen"] = config.ledGreenPin;
+  pins["ledRed"] = config.ledRedPin;
+  pins["dht"] = config.dhtPin;
+  pins["rfidSS"] = config.rfidSSPin;
+  pins["sda"] = config.sdaPin;
+  pins["scl"] = config.sclPin;
+  pins["buzzerpin"] = config.buzzerpin;
+  
+  // Sensor configuration
+  JsonObject sensors = doc.createNestedObject("sensors");
+  sensors["dhtType"] = config.dhtType;
+  sensors["lcdAddress"] = config.lcdAddress;
+  sensors["lcdCols"] = config.lcdCols;
+  sensors["lcdRows"] = config.lcdRows;
+  
+  // Serialize JSON to file
+  String configString;
+  serializeJson(doc, configString);
+  return configString;
+}
+
+
+
 bool loadAccessIds() {
   File accessFile = LittleFS.open(ACCESS_IDS_FILE, "r");
   if (!accessFile) {
@@ -295,7 +337,7 @@ bool saveAccessIds() {
 void accessSound(int buzzerPin) {
   tone(buzzerPin, 600, 300);  // 950 Mhz for 300 ms
   delay(300);
-  tone(buzzerPin, 700, 300);
+  tone(buzzerPin, 800, 300);
   delay(200);
 }
 
@@ -331,10 +373,32 @@ void listenForMessages() {
     
     // Read and print the message content
     Serial.print("Message content: ");
+    String msg = "";
     while (mqttClient.available()) {
-      Serial.print((char)mqttClient.read());
+      msg += (char)mqttClient.read();
+
     }
-    Serial.println();
+    Serial.println(msg);
+    StaticJsonDocument<200> docmessage;
+    DeserializationError error = deserializeJson(docmessage, msg);
+    
+    if (error) {
+      Serial.print("deserializeJson() failed: ");
+      Serial.println(error.c_str());
+      return;
+    }
+
+    if (docmessage.containsKey("command")) {
+      String command = docmessage["command"];
+      // Do something with the command
+      Serial.print("Received command: ");
+      Serial.println(command);
+      if (command == "getConfig"){
+        String configString = getConfigAsString();
+        publishMessage("RZ/config", configString);
+        Serial.println("Sent config to RZ/config");
+      }
+    }
   }
 }
 
