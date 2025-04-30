@@ -34,7 +34,7 @@ interface DataQueryParams {
   providedIn: 'root'
 })
 export class ApiService {
-  private baseUrl = 'http://localhost:5000';
+  private baseUrl = 'http://10.93.140.165:5000'; // Lets use the actual app server
   private healthUrl = `${this.baseUrl}/health`;
   private tokenKey = 'auth_token';
   private socket: Socket | null = null;
