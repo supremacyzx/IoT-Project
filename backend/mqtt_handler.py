@@ -11,8 +11,10 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Configuration from .env file
-MQTT_BROKER = os.getenv('MQTT_BROKER', '10.1.1.166')
+MQTT_BROKER = os.getenv('MQTT_BROKER', '10.93.140.165')
 MQTT_PORT = int(os.getenv('MQTT_PORT', 1884))
+MQTT_USER = os.getenv('MQTT_USER', 'grp5')
+MQTT_PASS = int(os.getenv('MQTT_PASS', "grp5123!"))
 MQTT_KEEPALIVE = int(os.getenv('MQTT_KEEPALIVE', 60))
 MQTT_TOPIC_DATA = os.getenv('MQTT_TOPIC_DATA', 'RZ/data')
 MQTT_TOPIC_INCIDENTS = os.getenv('MQTT_TOPIC_INCIDENTS', 'RZ/incidents')
@@ -29,6 +31,7 @@ class MQTTClient:
         self.display_data = []
         self.hidden_data = []
         self.client = mqtt.Client()
+        self.client.username_pw_set(MQTT_USER, MQTT_PASS)
         self.client.on_connect = self.on_connect
         self.client.on_message = self.on_message
         self.socketio = socketio  # Store the socketio instance
