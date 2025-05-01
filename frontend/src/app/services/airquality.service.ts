@@ -10,7 +10,7 @@ import { AuthService } from './auth.service';
 export class AirqualityService {
   private apiUrl = 'http://localhost:5000';
   private apiSegment = '/data';
-  private dataLimit = 30;
+  private dataLimit = 30; // Standardwert auf 30 geändert
   private websocket: WebSocket | null = null;
 
   // Observable für Echtzeitdaten
@@ -72,9 +72,9 @@ export class AirqualityService {
   /**
    * Holt die aktuellen Luftqualitätsdaten vom Server mit async/await
    */
-  async getAirqualityDataAsync(): Promise<Airquality[]> {
+  async getAirqualityDataAsync(limit: number = this.dataLimit): Promise<Airquality[]> {
     try {
-      const url = `${this.apiUrl}${this.apiSegment}?limit=${this.dataLimit}`;
+      const url = `${this.apiUrl}${this.apiSegment}?limit=${limit}`;
       const response = await lastValueFrom(this.http.get<ApiResponse>(url));
 
       // Transformiere die Antwort in das benötigte Format
@@ -86,7 +86,7 @@ export class AirqualityService {
       return transformedData;
     } catch (error) {
       console.error('Fehler beim Abrufen der Luftqualitätsdaten:', error);
-      throw error; // Re-throw für besseres Error-Handling in der aufrufenden Komponente
+      throw error;
     }
   }
 
@@ -108,11 +108,7 @@ export class AirqualityService {
    */
   async getHistoricalDataAsync(limit: number = this.dataLimit): Promise<Airquality[]> {
     try {
-      const url = `${this.apiUrl}${this.apiSegment}?limit=${limit}`;
-      const response = await lastValueFrom(this.http.get<ApiResponse>(url));
-
-      // Transformiere die Antwort in das benötigte Format
-      return response.data.map(entry => this.transformData(entry));
+      return this.getAirqualityDataAsync(limit);
     } catch (error) {
       console.error('Fehler beim Abrufen der historischen Daten:', error);
       throw error;
@@ -124,12 +120,22 @@ export class AirqualityService {
    */
   async getAirqualityDataWithParams(params: { [key: string]: any }): Promise<Airquality[]> {
     try {
+      // Aktualisiere das dataLimit, wenn ein Limit in den Parametern angegeben ist
+      if (params['limit']) {
+        this.setDataLimit(params['limit']);
+      }
+
       const queryParams = new URLSearchParams(params).toString();
       const url = `${this.apiUrl}${this.apiSegment}?${queryParams}`;
       const response = await lastValueFrom(this.http.get<ApiResponse>(url));
 
       // Transformiere die Antwort in das benötigte Format
-      return response.data.map(entry => this.transformData(entry));
+      const transformedData = response.data.map(entry => this.transformData(entry));
+
+      // Aktualisiere die Daten im BehaviorSubject
+      this.airqualityDataSubject.next(transformedData);
+
+      return transformedData;
     } catch (error) {
       console.error('Fehler beim Abrufen der Luftqualitätsdaten mit Parametern:', error);
       throw error;
@@ -143,4 +149,3 @@ export class AirqualityService {
     this.dataLimit = limit;
   }
 }
-

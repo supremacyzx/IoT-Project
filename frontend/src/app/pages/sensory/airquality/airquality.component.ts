@@ -34,7 +34,7 @@ export class AirqualityComponent implements OnInit, AfterViewInit, OnDestroy {
   };
 
   private loadingDelay = 300;
-  skeletonArray = Array(30).fill(0);
+  skeletonArray = Array(30).fill(0); // Beibehalten für Table-Skeleton-Loading
   private chart: Chart | null = null;
 
   constructor(private airqualityService: AirqualityService) {
@@ -42,11 +42,13 @@ export class AirqualityComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.loadAirqualityData();
+    // Setze das Limit im Service
+    this.airqualityService.setDataLimit(this.filters.limit);
+    this.loadFilteredData();
 
     // Abonniere Echtzeitdaten
     this.airqualityService.airqualityData$.subscribe((data) => {
-      this.airqualityData = data; // Kombinierte Daten (geladen + WebSocket)
+      this.airqualityData = data;
       if (this.viewMode === 'graph') {
         this.renderChart();
       }
@@ -77,7 +79,7 @@ export class AirqualityComponent implements OnInit, AfterViewInit, OnDestroy {
         ).subscribe();
       });
 
-      this.airqualityData = await this.airqualityService.getAirqualityDataAsync();
+      this.airqualityData = await this.airqualityService.getAirqualityDataAsync(this.filters.limit);
 
       if (this.airqualityData.length > 0) {
         this.latestEntry = this.airqualityData[0];
@@ -99,12 +101,15 @@ export class AirqualityComponent implements OnInit, AfterViewInit, OnDestroy {
     this.error = null;
 
     try {
-      await new Promise(resolve => {
-        of(null).pipe(
-          delay(this.loadingDelay),
-          finalize(() => resolve(null))
-        ).subscribe();
-      });
+      // Delay hinzufügen nur für die Tabellenansicht, nicht für den Graph
+      if (this.viewMode === 'table') {
+        await new Promise(resolve => {
+          of(null).pipe(
+            delay(this.loadingDelay),
+            finalize(() => resolve(null))
+          ).subscribe();
+        });
+      }
 
       this.airqualityData = await this.airqualityService.getAirqualityDataWithParams(this.filters);
 
@@ -126,15 +131,16 @@ export class AirqualityComponent implements OnInit, AfterViewInit, OnDestroy {
   setView(view: 'table' | 'graph'): void {
     this.viewMode = view;
     if (view === 'graph' && this.airqualityData.length > 0) {
-      setTimeout(() => this.renderChart(), 0); // Sicherstellen, dass das Canvas-Element verfügbar ist
+      setTimeout(() => this.renderChart(), 0);
     }
   }
 
   setLimit(limit: number): void {
     this.filters.limit = limit;
+    this.airqualityService.setDataLimit(limit);
     this.loadFilteredData().then(() => {
       if (this.viewMode === 'graph' && this.airqualityData.length > 0) {
-        setTimeout(() => this.renderChart(), 0); // Chart mit neuen Daten neu rendern
+        setTimeout(() => this.renderChart(), 0);
       }
     });
   }
@@ -150,12 +156,27 @@ export class AirqualityComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
-    // Kopiere und kehre die Daten für die Grafik um, damit die ältesten Daten links und die neuesten rechts angezeigt werden
-    const reversedData = [...this.airqualityData].reverse();
+    // Ermittle die tatsächliche Anzahl anzuzeigender Datensätze
+    // Bei limit=1 sollen 2 angezeigt werden, ansonsten die ausgewählte Anzahl
+    const displayLimit = this.filters.limit === 1 ? 2 : this.filters.limit;
+
+    // Beschränke die Daten auf die berechnete Anzahl
+    const limitedData = this.airqualityData.slice(0, displayLimit);
+
+    // Kopiere und kehre die Daten für die Grafik um
+    const reversedData = [...limitedData].reverse();
 
     const labels = reversedData.map(entry => new Date(entry.lastUpdate).toLocaleString());
     const temperatureData = reversedData.map(entry => entry.temperature);
     const humidityData = reversedData.map(entry => entry.humidity);
+
+    // Farben aus CSS-Variablen für konsistentes Styling
+    const getComputedStyle = window.getComputedStyle(document.documentElement);
+    const primaryColor = getComputedStyle.getPropertyValue('--color-primary').trim() || '#3b82f6';
+    const textColor = getComputedStyle.getPropertyValue('--color-text').trim() || '#e0e0e0';
+    const mutedColor = getComputedStyle.getPropertyValue('--color-text-muted').trim() || '#b0b0b0';
+    const bgColor = getComputedStyle.getPropertyValue('--color-background').trim() || '#1a1a1a';
+    const borderColor = getComputedStyle.getPropertyValue('--color-border').trim() || '#555555';
 
     this.chart = new Chart(ctx, {
       type: 'line',
@@ -165,8 +186,8 @@ export class AirqualityComponent implements OnInit, AfterViewInit, OnDestroy {
           {
             label: 'Temperatur (°C)',
             data: temperatureData,
-            borderColor: 'rgba(255, 99, 132, 1)', // Moderne Farbe: Rot
-            backgroundColor: 'rgba(255, 99, 132, 0.2)', // Transparenter Hintergrund
+            borderColor: 'rgba(255, 99, 132, 1)',
+            backgroundColor: 'rgba(255, 99, 132, 0.2)',
             borderWidth: 3,
             tension: 0.4,
             fill: true,
@@ -178,8 +199,8 @@ export class AirqualityComponent implements OnInit, AfterViewInit, OnDestroy {
           {
             label: 'Luftfeuchtigkeit (%)',
             data: humidityData,
-            borderColor: 'rgba(54, 162, 235, 1)', // Moderne Farbe: Blau
-            backgroundColor: 'rgba(54, 162, 235, 0.2)', // Transparenter Hintergrund
+            borderColor: 'rgba(54, 162, 235, 1)',
+            backgroundColor: 'rgba(54, 162, 235, 0.2)',
             borderWidth: 3,
             tension: 0.4,
             fill: true,
@@ -209,22 +230,59 @@ export class AirqualityComponent implements OnInit, AfterViewInit, OnDestroy {
           legend: {
             position: 'top',
             align: 'center',
+            maxHeight: 80,
+            reverse: false,
+            fullSize: true,
+            rtl: false,
             labels: {
-              color: 'white', // Farbe der Legendentexte
+              color: textColor,
               font: {
-                size: 14
+                size: 14,
+                weight: 'bold',
+                family: 'Inter, sans-serif',
               },
-              padding: 20
-            }
+              padding: 20,
+              boxWidth: 30,
+              boxHeight: 12,
+              usePointStyle: true,
+              pointStyle: 'circle',
+              pointStyleWidth: 8,
+              textAlign: 'left',
+
+              useBorderRadius: true,
+              borderRadius: 4
+            },
           },
           tooltip: {
-            backgroundColor: '#1a1a1a',
-            titleColor: 'var(--color-primary)', // Farbe des Tooltip-Titels
-            bodyColor: 'grey', // Farbe des Tooltip-Textes
-            borderColor: '#555555',
+            backgroundColor: bgColor,
+            titleColor: primaryColor,
+            bodyColor: textColor,
+            borderColor: borderColor,
             borderWidth: 1,
-
+            cornerRadius: 6,
             usePointStyle: true,
+            padding: 12,
+            boxPadding: 5,
+            titleFont: {
+              weight: 'bold',
+              size: 14,
+            },
+            bodyFont: {
+              size: 13,
+            },
+            displayColors: true,
+            callbacks: {
+              title: (tooltipItems) => {
+                const date = new Date(tooltipItems[0].label);
+                return date.toLocaleDateString('de-DE', {
+                  day: '2-digit',
+                  month: '2-digit',
+                  year: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit'
+                });
+              }
+            }
           }
         },
         scales: {
@@ -233,19 +291,25 @@ export class AirqualityComponent implements OnInit, AfterViewInit, OnDestroy {
               color: 'transparent',
             },
             ticks: {
-              color: '#b0b0b0', // Farbe der X-Achsenticks
+              color: mutedColor,
               maxRotation: 30,
               minRotation: 30,
               padding: 10,
             },
+            display: false
           },
           y: {
             grid: {
-              color: '#242424',
+              color: borderColor,
+              lineWidth: 0.5,
+
             },
             ticks: {
-              color: '#b0b0b0', // Farbe der Y-Achsenticks
+              color: mutedColor,
               padding: 15,
+              font: {
+                size: 12,
+              }
             },
             beginAtZero: true,
           },

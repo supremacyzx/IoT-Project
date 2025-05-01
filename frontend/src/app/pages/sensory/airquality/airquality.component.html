@@ -14,7 +14,7 @@
         <!-- Buttons für die Anzahl der Einträge - jetzt mit Umrandung statt Füllung -->
         <div class="flex items-center rounded-md" style="background-color: var(--color-background-secondary); border: var(--border-width) var(--border-style) var(--color-border);">
           <button
-            *ngFor="let limit of [1, 10, 15, 30, 50, 100]"
+            *ngFor="let limit of [5, 10, 15, 30, 50, 100]"
             (click)="setLimit(limit)"
             class="px-3 py-1.5 text-sm font-medium rounded-md"
             [style]="filters.limit === limit ?
@@ -57,7 +57,7 @@
     </div>
 
     <!-- Tabellenansicht mit Skeleton-Loading -->
-    <div *ngIf="viewMode === 'table'" class="flex-1 overflow-hidden rounded-lg shadow-md" style="border: var(--border-width) var(--border-style) var(--color-border);">
+    <div *ngIf="viewMode === 'table'" class="flex-1 overflow-hidden rounded-lg shadow-md p-4" style="border: var(--border-width) var(--border-style) var(--color-border);">
       <!-- Tabellen-Container mit Overflow -->
       <div class="overflow-y-container h-full">
         <table class="min-w-full table-fixed" style="border-collapse: separate; border-spacing: 0;">
@@ -127,66 +127,13 @@
     <div *ngIf="viewMode === 'graph'" class="flex-1 overflow-hidden rounded-lg shadow-md flex items-center justify-center p-4" style="border: var(--border-width) var(--border-style) var(--color-border);">
       <!-- Graph-Container mit Overflow -->
       <div class="overflow-y-container h-full w-full flex items-center justify-center">
-        <!-- Skeleton-Loading für Graph - Verbesserte, größere Version -->
-        <div *ngIf="isLoading" class="h-full w-full flex flex-col items-center justify-center p-4" style="background-color: var(--color-background-secondary); border-radius: var(--border-radius);">
-          <!-- Legenden-Skeleton oben -->
-          <div class="w-full flex justify-center mb-8">
-            <div class="flex items-center space-x-6">
-              <div class="flex items-center">
-                <div class="h-4 w-4 rounded-full animate-pulse mr-2" style="background-color: rgba(255, 99, 132, 1);"></div>
-                <div class="h-5 w-28 rounded animate-pulse" style="background-color: var(--color-border);"></div>
-              </div>
-              <div class="flex items-center">
-                <div class="h-4 w-4 rounded-full animate-pulse mr-2" style="background-color: rgba(54, 162, 235, 1);"></div>
-                <div class="h-5 w-32 rounded animate-pulse" style="background-color: var(--color-border);"></div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Haupt-Chart-Skeleton -->
-          <div class="h-full w-full min-h-[400px] flex flex-col justify-between">
-            <!-- Y-Achsen-Werte -->
-            <div class="flex justify-between h-full">
-              <!-- Y-Achse links -->
-              <div class="flex flex-col justify-between h-full py-4">
-                <div class="h-4 w-12 rounded animate-pulse" style="background-color: var(--color-border);"></div>
-                <div class="h-4 w-10 rounded animate-pulse" style="background-color: var(--color-border);"></div>
-                <div class="h-4 w-8 rounded animate-pulse" style="background-color: var(--color-border);"></div>
-                <div class="h-4 w-10 rounded animate-pulse" style="background-color: var(--color-border);"></div>
-              </div>
-
-              <!-- Chart-Bereich -->
-              <div class="flex-1 h-full px-4 relative">
-                <!-- Horizontale Linien -->
-                <div class="absolute top-1/4 left-0 right-0 h-px" style="background-color: #242424;"></div>
-                <div class="absolute top-2/4 left-0 right-0 h-px" style="background-color: #242424;"></div>
-                <div class="absolute top-3/4 left-0 right-0 h-px" style="background-color: #242424;"></div>
-
-                <!-- Graphen-Linien -->
-                <div class="h-full w-full flex items-center">
-                  <div class="h-1/2 w-full rounded-lg animate-pulse opacity-50" style="background: linear-gradient(to right, rgba(54, 162, 235, 0.3), rgba(255, 99, 132, 0.3));"></div>
-                </div>
-              </div>
-            </div>
-
-            <!-- X-Achsen-Werte -->
-            <div class="flex justify-between w-full mt-4">
-              <div class="h-4 w-20 rounded animate-pulse" style="background-color: var(--color-border);"></div>
-              <div class="h-4 w-20 rounded animate-pulse" style="background-color: var(--color-border);"></div>
-              <div class="h-4 w-20 rounded animate-pulse" style="background-color: var(--color-border);"></div>
-              <div class="h-4 w-20 rounded animate-pulse" style="background-color: var(--color-border);"></div>
-              <div class="h-4 w-20 rounded animate-pulse" style="background-color: var(--color-border);"></div>
-            </div>
-          </div>
-        </div>
-
         <!-- Graph-Inhalt -->
-        <div *ngIf="!isLoading && airqualityData.length > 0" class="h-full w-full">
+        <div *ngIf="airqualityData.length > 0" class="h-full w-full">
           <canvas id="airqualityChart" class="airquality-chart"></canvas>
         </div>
 
         <!-- Keine Daten -->
-        <div *ngIf="!isLoading && airqualityData.length === 0" class="text-center p-4" style="color: var(--color-text-secondary);">
+        <div *ngIf="airqualityData.length === 0" class="text-center p-4" style="color: var(--color-text-secondary);">
           <p>Keine Daten verfügbar. Bitte passen Sie die Filter an.</p>
         </div>
       </div>
@@ -198,4 +145,3 @@
     </div>
   </div>
 </div>
-
