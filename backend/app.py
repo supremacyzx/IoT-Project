@@ -357,7 +357,7 @@ def health_check():
 
 if __name__ == '__main__':
     # Run the app
-    mqtt_client.start()
+    mqtt_client.start(clients)
     #comment out mock sender if not debugging
     start_mock_sender(clients)
     print("MQTT client started and listening for messages")
