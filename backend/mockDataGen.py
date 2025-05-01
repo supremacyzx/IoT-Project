@@ -33,22 +33,41 @@ def _insert_into_db(data):
         except Exception as e:
             print(f"[DB ERROR] Database insertion error: {e}")
 
+# Global variables to keep state between function calls
+current_tmp = random.uniform(22.0, 25.0)
+current_lf = random.uniform(40.0, 50.0)
+
 def generate_mock_data():
+    global current_tmp, current_lf
+
+    # Introduce realistic drift with occasional jumps
+    tmp_change = random.uniform(-0.3, 0.3)
+    lf_change = random.uniform(-1.0, 1.0)
+
+    # 10% chance to simulate a sudden environmental shift
+    if random.random() < 0.1:
+        tmp_change += random.uniform(-2.0, 2.0)
+        lf_change += random.uniform(-5.0, 5.0)
+
+    # Apply the change and clamp values to a realistic range
+    current_tmp = min(max(current_tmp + tmp_change, 15.0), 35.0)
+    current_lf = min(max(current_lf + lf_change, 10.0), 90.0)
+
     data = {
-        'tmp': round(random.uniform(20.0, 30.0), 2),
-        'lf': round(random.uniform(20.0, 60.0), 2),
+        'tmp': round(current_tmp, 2),
+        'lf': round(current_lf, 2),
         'locked': random.choice([True, False]),
     }
-    
-    # Speichere die generierten Daten in der Datenbank
+
     _insert_into_db(data)
     print(f"[MOCK DATA] Generated and stored: {data}")
-    
+
     return data
+
 
 def send_to_clients():
     while True:
-        time.sleep(10)
+        time.sleep(0.5)  # Sleep for 0.5 seconds to avoid overwhelming the clients
         if clients is None:
             continue
         data = generate_mock_data()
