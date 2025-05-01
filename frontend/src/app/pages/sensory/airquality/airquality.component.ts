@@ -43,6 +43,14 @@ export class AirqualityComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadAirqualityData();
+
+    // Abonniere Echtzeitdaten
+    this.airqualityService.airqualityData$.subscribe((data) => {
+      this.airqualityData = data; // Kombinierte Daten (geladen + WebSocket)
+      if (this.viewMode === 'graph') {
+        this.renderChart();
+      }
+    });
   }
 
   ngAfterViewInit(): void {

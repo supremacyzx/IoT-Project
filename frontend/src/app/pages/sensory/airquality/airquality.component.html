@@ -14,7 +14,7 @@
         <!-- Buttons für die Anzahl der Einträge - jetzt mit Umrandung statt Füllung -->
         <div class="flex items-center rounded-md" style="background-color: var(--color-background-secondary); border: var(--border-width) var(--border-style) var(--color-border);">
           <button
-            *ngFor="let limit of [30, 50, 100]"
+            *ngFor="let limit of [1, 10, 15, 30, 50, 100]"
             (click)="setLimit(limit)"
             class="px-3 py-1.5 text-sm font-medium rounded-md"
             [style]="filters.limit === limit ?
@@ -198,3 +198,4 @@
     </div>
   </div>
 </div>
+
