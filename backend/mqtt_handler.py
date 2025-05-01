@@ -86,7 +86,7 @@ class MQTTClient:
                         message = f"Real data: {data}"
                         for ws in self.clients[:]:
                             try:
-                                ws.send(message)
+                                ws.send(data)
                             except:
                                 self.clients.remove(ws)
                     except Exception as e:

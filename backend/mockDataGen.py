@@ -6,8 +6,9 @@ clients = None
 
 def generate_mock_data():
     return {
-        'temperature': round(random.uniform(20.0, 30.0), 2),
-        'humidity': round(random.uniform(20.0, 60.0), 2)
+        'tmp': round(random.uniform(20.0, 30.0), 2),
+        'lf': round(random.uniform(20.0, 60.0), 2),
+        'locked': random.choice([True, False]),
     }
 
 def send_to_clients():
@@ -19,7 +20,7 @@ def send_to_clients():
         message = f"Mock data: {data}"
         for ws in clients[:]:
             try:
-                ws.send(message)
+                ws.send(data)
             except:
                 clients.remove(ws)
 
