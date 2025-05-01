@@ -150,9 +150,12 @@ export class AirqualityComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
-    const labels = this.airqualityData.map(entry => new Date(entry.lastUpdate).toLocaleString());
-    const temperatureData = this.airqualityData.map(entry => entry.temperature);
-    const humidityData = this.airqualityData.map(entry => entry.humidity);
+    // Kopiere und kehre die Daten für die Grafik um, damit die ältesten Daten links und die neuesten rechts angezeigt werden
+    const reversedData = [...this.airqualityData].reverse();
+
+    const labels = reversedData.map(entry => new Date(entry.lastUpdate).toLocaleString());
+    const temperatureData = reversedData.map(entry => entry.temperature);
+    const humidityData = reversedData.map(entry => entry.humidity);
 
     this.chart = new Chart(ctx, {
       type: 'line',
