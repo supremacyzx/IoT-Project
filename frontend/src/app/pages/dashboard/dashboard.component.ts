@@ -1,16 +1,11 @@
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { SlideContentModel } from '../../../models/slideContent.model';
 import {SlideshowComponent} from '../../components/slideshow/slideshow.component';
-import {AirqualityComponent} from '../../components/airquality/airquality.component';
+import { SlideContentModel } from '../../../models/slideContent.model';
 
 @Component({
   selector: 'app-dashboard',
-  standalone: true,
   imports: [
-    CommonModule,
-    SlideshowComponent,
-    AirqualityComponent,
+    SlideshowComponent
   ],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
@@ -61,4 +56,5 @@ export class DashboardComponent {
       link: 'https://zigbeealliance.org/'
     }
   ];
+
 }

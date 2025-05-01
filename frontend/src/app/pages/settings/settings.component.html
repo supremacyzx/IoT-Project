@@ -1,0 +1,32 @@
+<div class="flex flex-col w-full h-full" style="color: var(--color-text);">
+  <div class="p-6">
+    <h1 class="font-bold mb-6" style="font-size: var(--font-size-lg);">Settings</h1>
+
+    <div class="flex items-center space-x-4" style="font-weight: var(--font-weight-bold);">
+      <a
+        routerLink="system"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
+        class="px-4 py-2 rounded-md transition-colors"
+        style="color: var(--color-text-muted);
+               background: transparent;
+               ">
+        System
+      </a>
+      <a
+        routerLink="appearance"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
+        class="px-4 py-2 rounded-md transition-colors"
+        style="color: var(--color-text-muted);
+               background: transparent;
+               ">
+        Appearance
+      </a>
+    </div>
+  </div>
+
+  <div class="px-6 pb-6 flex-1 overflow-auto">
+    <router-outlet></router-outlet>
+  </div>
+</div>

@@ -1,0 +1,15 @@
+.flex.items-center label {
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+.icon-mask {
+  width: 20px;
+  height: 20px;
+  background-color: var(--color-icon); // This applies color to the masked area
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: cover;
+  mask-size: cover;
+  display: block;
+}

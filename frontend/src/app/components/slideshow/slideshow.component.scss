@@ -2,13 +2,14 @@
   width: 100%;
   overflow: hidden;
   position: relative;
-  margin: 20px 0;
+  margin: var(--spacing-md) 0;
+  border-radius: var(--border-radius);
 }
 
 .slide-track {
   display: flex;
-  gap: 20px;
-  padding: 10px 0;
+  gap: var(--spacing-md);
+  padding: var(--spacing-sm) 0;
   width: fit-content;
 }
 
@@ -22,21 +23,21 @@
 
 .slide-item {
   flex: 0 0 250px;
-  padding: 15px;
-  border-radius: 8px;
-  background-color: #f8f9fa;
+  padding: var(--spacing-md);
+  border-radius: var(--border-radius);
+  background-color: var(--color-background-secondary);
   backdrop-filter: blur(10px);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  transition: transform 0.3s ease;
-  border: 1px solid #e9ecef;
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  border: var(--border-width) var(--border-style) var(--color-border);
 
   &:hover {
     transform: translateY(-5px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+    box-shadow: var(--shadow-md);
   }
 
   .logo-link {
@@ -56,7 +57,7 @@
     width: 140px;
     height: 140px;
     object-fit: contain;
-    transition: all 0.3s ease;
+    transition: all var(--transition-fast);
   }
 }
 

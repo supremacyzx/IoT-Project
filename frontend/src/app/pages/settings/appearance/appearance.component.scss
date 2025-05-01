@@ -1,0 +1,558 @@
+// Theme Cards Container
+.theme-card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-md);
+  cursor: pointer;
+  transition: all var(--transition-medium);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--color-border-hover);
+    background-color: var(--color-background-hover);
+  }
+
+  &.active {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px rgba(var(--color-primary-rgb), 0.2);
+    background-color: var(--color-background-selected);
+  }
+}
+
+// Window Bar Cards
+.windowbar-card {
+  @extend .theme-card;
+
+  img {
+    filter: brightness(0.8);
+    transition: filter var(--transition-medium);
+  }
+
+  &:hover img {
+    filter: brightness(1);
+  }
+}
+
+// Theme Preview Area
+.theme-preview {
+  aspect-ratio: 16/9;
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  margin-bottom: var(--spacing-md);
+  position: relative;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--color-border);
+  transition: all var(--transition-medium);
+}
+
+.windowbar-preview {
+  transition: all var(--transition-medium);
+
+  &.default-preview {
+    background-color: #f3f4f6;
+    .dark-theme & {
+      background-color: #2a2a2a;
+    }
+  }
+
+  &.macos-preview {
+    background-color: #f9fafb;
+    .dark-theme & {
+      background-color: #1f1f1f;
+    }
+  }
+
+  &.system-preview {
+    background-color: var(--color-background-tertiary);
+  }
+}
+
+// Preview Elements
+.preview-header {
+  height: 15%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  padding: 0 var(--spacing-sm);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.preview-dots {
+  display: flex;
+  gap: var(--spacing-xs);
+
+  span {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: block;
+  }
+}
+
+.preview-sidebar {
+  position: absolute;
+  left: 0;
+  top: 15%;
+  bottom: 0;
+  width: 25%;
+  padding: var(--spacing-sm) var(--spacing-xs);
+  border-right: 1px solid var(--color-border);
+}
+
+.sidebar-item {
+  height: 8px;
+  margin-bottom: var(--spacing-xs);
+  border-radius: 4px;
+  opacity: 0.7;
+
+  &.active {
+    opacity: 1;
+  }
+}
+
+.preview-content {
+  position: absolute;
+  left: 25%;
+  top: 15%;
+  bottom: 0;
+  right: 0;
+  padding: var(--spacing-sm);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.content-card {
+  height: 20px;
+  border-radius: var(--border-radius-sm);
+
+  &.accent {
+    height: 30px;
+  }
+}
+
+.content-lines {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.content-line {
+  height: 4px;
+  border-radius: 2px;
+  width: 100%;
+
+  &.short {
+    width: 60%;
+  }
+}
+
+// Light Theme Preview - Static colors that don't change with theme
+.light-preview {
+  background-color: #ffffff;
+
+  .preview-header {
+    background-color: #f8f9fa;
+
+    .preview-dots span {
+      &:nth-child(1) { background-color: #ff605c; }
+      &:nth-child(2) { background-color: #ffbd44; }
+      &:nth-child(3) { background-color: #00ca4e; }
+    }
+  }
+
+  .preview-sidebar {
+    background-color: #f1f3f5;
+
+    .sidebar-item {
+      background-color: #dee2e6;
+
+      &.active {
+        background-color: #4dabf7;
+      }
+    }
+  }
+
+  .preview-content {
+    background-color: #ffffff;
+
+    .content-card {
+      background-color: #f8f9fa;
+
+      &.accent {
+        background-color: #4dabf7;
+      }
+    }
+
+    .content-line {
+      background-color: #e9ecef;
+    }
+  }
+}
+
+// Dark Theme Preview - Static colors that don't change with theme
+.dark-preview {
+  background-color: #121212;
+
+  .preview-header {
+    background-color: #1a1a1a;
+
+    .preview-dots span {
+      &:nth-child(1) { background-color: #ff605c; }
+      &:nth-child(2) { background-color: #ffbd44; }
+      &:nth-child(3) { background-color: #00ca4e; }
+    }
+  }
+
+  .preview-sidebar {
+    background-color: #212121;
+
+    .sidebar-item {
+      background-color: #424242;
+
+      &.active {
+        background-color: #339af0;
+      }
+    }
+  }
+
+  .preview-content {
+    background-color: #121212;
+
+    .content-card {
+      background-color: #1e1e1e;
+
+      &.accent {
+        background-color: #339af0;
+      }
+    }
+
+    .content-line {
+      background-color: #2d2d2d;
+    }
+  }
+}
+
+// System Theme Preview
+.system-preview {
+  display: flex;
+  position: relative;
+  overflow: hidden;
+
+  .left-preview, .right-preview {
+    width: 50%;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .left-preview {
+    background-color: #ffffff;
+
+    .preview-header {
+      background-color: #f8f9fa;
+
+      .preview-dots span {
+        &:nth-child(1) { background-color: #ff605c; }
+        &:nth-child(2) { background-color: #ffbd44; }
+        &:nth-child(3) { background-color: #00ca4e; }
+      }
+    }
+
+    .preview-sidebar {
+      background-color: #f1f3f5;
+
+      .sidebar-item {
+        background-color: #dee2e6;
+
+        &.active {
+          background-color: #4dabf7;
+        }
+      }
+    }
+
+    .preview-content {
+      background-color: #ffffff;
+
+      .content-card {
+        background-color: #f8f9fa;
+
+        &.accent {
+          background-color: #4dabf7;
+        }
+      }
+
+      .content-line {
+        background-color: #e9ecef;
+      }
+    }
+  }
+
+  .right-preview {
+    background-color: #121212;
+
+    .preview-header {
+      background-color: #1a1a1a;
+
+      .preview-dots span {
+        &:nth-child(1) { background-color: #ff605c; }
+        &:nth-child(2) { background-color: #ffbd44; }
+        &:nth-child(3) { background-color: #00ca4e; }
+      }
+    }
+
+    .preview-sidebar {
+      background-color: #212121;
+
+      .sidebar-item {
+        background-color: #424242;
+
+        &.active {
+          background-color: #339af0;
+        }
+      }
+    }
+
+    .preview-content {
+      background-color: #121212;
+
+      .content-card {
+        background-color: #1e1e1e;
+
+        &.accent {
+          background-color: #339af0;
+        }
+      }
+
+      .content-line {
+        background-color: #2d2d2d;
+      }
+    }
+  }
+
+  .system-divider {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background-color: var(--color-border);
+    z-index: 2;
+  }
+}
+
+// Card styling
+.card {
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-medium);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(var(--color-border-rgb), 0.8);
+
+  &:hover {
+    box-shadow: var(--shadow-md);
+  }
+}
+
+.icon-mask {
+  width: 20px;
+  height: 20px;
+  background-color: var(--color-icon);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-position: center;
+  mask-position: center;
+  display: block;
+  transition: all var(--transition-medium);
+
+  .windowbar-card:hover & {
+    background-color: var(--color-windowbar-icon-hover);
+  }
+
+  .windowbar-card.active & {
+    background-color: var(--color-primary);
+  }
+}
+// Window Bar Cards and Previews
+.windowbar-card {
+  @extend .theme-card;
+
+  img {
+    filter: brightness(0.8);
+    transition: filter var(--transition-medium);
+  }
+
+  &:hover img {
+    filter: brightness(1);
+  }
+}
+
+.windowbar-preview {
+  aspect-ratio: 16/9;
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  margin-bottom: var(--spacing-md);
+  position: relative;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--color-border);
+
+  &.default-preview {
+    background-color: var(--color-background);
+
+    .dark-theme & {
+      background-color: #202020;
+    }
+  }
+
+  &.macos-preview {
+    background-color: var(--color-background);
+
+    .dark-theme & {
+      background-color: #242424;
+    }
+  }
+
+  &.system-preview {
+    display: flex;
+    position: relative;
+
+    .left-preview, .right-preview {
+      width: 50%;
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .left-preview {
+      background-color: var(--color-background);
+
+      .dark-theme & {
+        background-color: #202020;
+      }
+    }
+
+    .right-preview {
+      background-color: var(--color-background);
+
+      .dark-theme & {
+        background-color: #242424;
+      }
+    }
+
+    .system-divider {
+      position: absolute;
+      left: 50%;
+      top: 0;
+      bottom: 0;
+      width: 1px;
+      background-color: var(--color-border);
+      z-index: 2;
+    }
+  }
+}
+
+// Windows style controls
+.windows-controls {
+  display: flex;
+  gap: 4px;
+  padding: 8px;
+  justify-content: flex-end;
+}
+
+.windows-button {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+
+  &.minimize {
+    background-color: #909090;
+
+    .dark-theme & {
+      background-color: #a0a0a0;
+    }
+  }
+
+  &.maximize {
+    background-color: #909090;
+
+    .dark-theme & {
+      background-color: #a0a0a0;
+    }
+  }
+
+  &.close {
+    background-color: #e81123;
+  }
+}
+
+// macOS style controls
+.macos-controls {
+  display: flex;
+  gap: 6px;
+  padding: 8px;
+  justify-content: flex-start;
+}
+
+.macos-button {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+
+  &.close {
+    background-color: #ff5f57;
+  }
+
+  &.minimize {
+    background-color: #febc2e;
+  }
+
+  &.maximize {
+    background-color: #28c840;
+  }
+}
+
+// Window content preview
+.window-content {
+  position: absolute;
+  top: 28px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.window-toolbar {
+  height: 8px;
+  border-radius: 4px;
+  margin-bottom: 4px;
+  background-color: var(--color-background-secondary);
+
+  .dark-theme & {
+    background-color: #3a3a3a;
+  }
+}
+
+.window-content-line {
+  height: 4px;
+  border-radius: 2px;
+  background-color: var(--color-background-secondary);
+
+  .dark-theme & {
+    background-color: #3a3a3a;
+  }
+
+  &.short {
+    width: 70%;
+  }
+}

@@ -1,0 +1,200 @@
+<!-- Container mit reduzierter Margin -->
+<div class="max-w-full mx-4 h-full overflow-hidden">
+  <div class="space-y-6 flex flex-col h-full">
+    <!-- Header mit Titel, Buttons für Anzahl und Ansichtsumschaltung - jetzt sticky -->
+    <div class="flex justify-between items-center sticky top-0 z-20 py-3" style="background-color: var(--color-background); border-bottom: var(--border-width) var(--border-style) var(--color-border);">
+      <div>
+        <h1 class="text-2xl font-bold" style="color: var(--color-text);">Luftqualität</h1>
+        <p style="color: var(--color-text-muted); font-size: var(--font-size-md);">
+          Übersicht der Luftqualitätsdaten
+        </p>
+      </div>
+
+      <div class="flex items-center gap-4">
+        <!-- Buttons für die Anzahl der Einträge - jetzt mit Umrandung statt Füllung -->
+        <div class="flex items-center rounded-md" style="background-color: var(--color-background-secondary); border: var(--border-width) var(--border-style) var(--color-border);">
+          <button
+            *ngFor="let limit of [30, 50, 100]"
+            (click)="setLimit(limit)"
+            class="px-3 py-1.5 text-sm font-medium rounded-md"
+            [style]="filters.limit === limit ?
+              'background-color: transparent; color: var(--color-primary); border: 1px solid transparent;' :
+              'background-color: transparent; color: var(--color-text); border: 1px solid transparent;'"
+          >
+            {{ limit }}
+          </button>
+        </div>
+
+        <!-- Buttons für Tabellen- oder Graph-Ansicht - nur Icons - mit Umrandung statt Füllung -->
+        <div class="flex items-center rounded-md" style="background-color: var(--color-background-secondary); border: var(--border-width) var(--border-style) var(--color-border);">
+          <button
+            (click)="setView('table')"
+            class="px-2 py-2 rounded-md flex items-center justify-center"
+            [style]="viewMode === 'table' ?
+              'background-color: transparent; color: var(--color-primary); border: 1px solid transparent;' :
+              'background-color: transparent; color: var(--color-text); border: 1px solid transparent;'"
+            aria-label="Tabellenansicht"
+          >
+            <i-lucide [name]="icons.Table2" [size]="18" [strokeWidth]="2"></i-lucide>
+          </button>
+          <button
+            (click)="setView('graph')"
+            class="px-2 py-2 rounded-md flex items-center justify-center"
+            [style]="viewMode === 'graph' ?
+              'background-color: transparent; color: var(--color-primary); border: 1px solid transparent;' :
+              'background-color: transparent; color: var(--color-text); border: 1px solid transparent;'"
+            aria-label="Graphansicht"
+          >
+            <i-lucide [name]="icons.BarChart3" [size]="18" [strokeWidth]="2"></i-lucide>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fehleranzeige -->
+    <div *ngIf="error" class="text-center mt-4">
+      <p style="color: var(--color-error);">{{ error }}</p>
+    </div>
+
+    <!-- Tabellenansicht mit Skeleton-Loading -->
+    <div *ngIf="viewMode === 'table'" class="flex-1 overflow-hidden rounded-lg shadow-md" style="border: var(--border-width) var(--border-style) var(--color-border);">
+      <!-- Tabellen-Container mit Overflow -->
+      <div class="overflow-y-container h-full">
+        <table class="min-w-full table-fixed" style="border-collapse: separate; border-spacing: 0;">
+          <thead class="sticky top-0 z-10" style="background-color: var(--color-background-secondary);">
+            <tr>
+              <th scope="col" class="py-3 px-6 text-left font-medium" style="color: var(--color-text-secondary); border-bottom: var(--border-width) var(--border-style) var(--color-border);">
+                <div class="flex items-center">
+                  <i-lucide [name]="icons.Thermometer" [size]="16" [strokeWidth]="2" class="mr-2" style="color: rgba(255, 99, 132, 1);"></i-lucide>
+                  <span class="uppercase text-xs">Temperatur</span>
+                </div>
+              </th>
+              <th scope="col" class="py-3 px-6 text-left font-medium" style="color: var(--color-text-secondary); border-bottom: var(--border-width) var(--border-style) var(--color-border);">
+                <div class="flex items-center">
+                  <i-lucide [name]="icons.Droplets" [size]="16" [strokeWidth]="2" class="mr-2" style="color: rgba(54, 162, 235, 1);"></i-lucide>
+                  <span class="uppercase text-xs">Luftfeuchtigkeit</span>
+                </div>
+              </th>
+              <th scope="col" class="py-3 px-6 text-left font-medium" style="color: var(--color-text-secondary); border-bottom: var(--border-width) var(--border-style) var(--color-border);">
+                <div class="flex items-center">
+                  <i-lucide [name]="icons.Clock" [size]="16" [strokeWidth]="2" class="mr-2" style="color: var(--color-icon)"></i-lucide>
+                  <span class="uppercase text-xs">Letztes Update</span>
+                </div>
+              </th>
+            </tr>
+          </thead>
+
+          <!-- Skeleton-Loading-Animation -->
+          <tbody *ngIf="isLoading">
+            <tr *ngFor="let item of skeletonArray; let i = index"
+                [style]="i % 2 === 0 ?
+                  'background-color: var(--color-background);' :
+                  'background-color: var(--color-background-secondary);'">
+              <td class="py-4 px-6" style="border-bottom: var(--border-width) var(--border-style) var(--color-border);">
+                <div class="h-6 w-24 rounded animate-pulse" style="background-color: var(--color-border);"></div>
+              </td>
+              <td class="py-4 px-6" style="border-bottom: var(--border-width) var(--border-style) var(--color-border);">
+                <div class="h-6 w-20 rounded animate-pulse" style="background-color: var(--color-border);"></div>
+              </td>
+              <td class="py-4 px-6" style="border-bottom: var(--border-width) var(--border-style) var(--color-border);">
+                <div class="h-6 w-32 rounded animate-pulse" style="background-color: var(--color-border);"></div>
+              </td>
+            </tr>
+          </tbody>
+
+          <!-- Tatsächliche Daten -->
+          <tbody *ngIf="!isLoading && airqualityData.length > 0">
+            <tr *ngFor="let entry of airqualityData; let i = index"
+                [style]="i % 2 === 0 ?
+                  'background-color: var(--color-background);' :
+                  'background-color: var(--color-background-secondary);'">
+              <td class="py-4 px-6 text-sm" style="color: var(--color-text); border-bottom: var(--border-width) var(--border-style) var(--color-border);">
+                {{ entry.temperature }} °C
+              </td>
+              <td class="py-4 px-6 text-sm" style="color: var(--color-text); border-bottom: var(--border-width) var(--border-style) var(--color-border);">
+                {{ entry.humidity }} %
+              </td>
+              <td class="py-4 px-6 text-sm" style="color: var(--color-text); border-bottom: var(--border-width) var(--border-style) var(--color-border);">
+                {{ formatTimeAgo(entry.lastUpdate) }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Graph-Ansicht -->
+    <div *ngIf="viewMode === 'graph'" class="flex-1 overflow-hidden rounded-lg shadow-md flex items-center justify-center p-4" style="border: var(--border-width) var(--border-style) var(--color-border);">
+      <!-- Graph-Container mit Overflow -->
+      <div class="overflow-y-container h-full w-full flex items-center justify-center">
+        <!-- Skeleton-Loading für Graph - Verbesserte, größere Version -->
+        <div *ngIf="isLoading" class="h-full w-full flex flex-col items-center justify-center p-4" style="background-color: var(--color-background-secondary); border-radius: var(--border-radius);">
+          <!-- Legenden-Skeleton oben -->
+          <div class="w-full flex justify-center mb-8">
+            <div class="flex items-center space-x-6">
+              <div class="flex items-center">
+                <div class="h-4 w-4 rounded-full animate-pulse mr-2" style="background-color: rgba(255, 99, 132, 1);"></div>
+                <div class="h-5 w-28 rounded animate-pulse" style="background-color: var(--color-border);"></div>
+              </div>
+              <div class="flex items-center">
+                <div class="h-4 w-4 rounded-full animate-pulse mr-2" style="background-color: rgba(54, 162, 235, 1);"></div>
+                <div class="h-5 w-32 rounded animate-pulse" style="background-color: var(--color-border);"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Haupt-Chart-Skeleton -->
+          <div class="h-full w-full min-h-[400px] flex flex-col justify-between">
+            <!-- Y-Achsen-Werte -->
+            <div class="flex justify-between h-full">
+              <!-- Y-Achse links -->
+              <div class="flex flex-col justify-between h-full py-4">
+                <div class="h-4 w-12 rounded animate-pulse" style="background-color: var(--color-border);"></div>
+                <div class="h-4 w-10 rounded animate-pulse" style="background-color: var(--color-border);"></div>
+                <div class="h-4 w-8 rounded animate-pulse" style="background-color: var(--color-border);"></div>
+                <div class="h-4 w-10 rounded animate-pulse" style="background-color: var(--color-border);"></div>
+              </div>
+
+              <!-- Chart-Bereich -->
+              <div class="flex-1 h-full px-4 relative">
+                <!-- Horizontale Linien -->
+                <div class="absolute top-1/4 left-0 right-0 h-px" style="background-color: #242424;"></div>
+                <div class="absolute top-2/4 left-0 right-0 h-px" style="background-color: #242424;"></div>
+                <div class="absolute top-3/4 left-0 right-0 h-px" style="background-color: #242424;"></div>
+
+                <!-- Graphen-Linien -->
+                <div class="h-full w-full flex items-center">
+                  <div class="h-1/2 w-full rounded-lg animate-pulse opacity-50" style="background: linear-gradient(to right, rgba(54, 162, 235, 0.3), rgba(255, 99, 132, 0.3));"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- X-Achsen-Werte -->
+            <div class="flex justify-between w-full mt-4">
+              <div class="h-4 w-20 rounded animate-pulse" style="background-color: var(--color-border);"></div>
+              <div class="h-4 w-20 rounded animate-pulse" style="background-color: var(--color-border);"></div>
+              <div class="h-4 w-20 rounded animate-pulse" style="background-color: var(--color-border);"></div>
+              <div class="h-4 w-20 rounded animate-pulse" style="background-color: var(--color-border);"></div>
+              <div class="h-4 w-20 rounded animate-pulse" style="background-color: var(--color-border);"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Graph-Inhalt -->
+        <div *ngIf="!isLoading && airqualityData.length > 0" class="h-full w-full">
+          <canvas id="airqualityChart" class="airquality-chart"></canvas>
+        </div>
+
+        <!-- Keine Daten -->
+        <div *ngIf="!isLoading && airqualityData.length === 0" class="text-center p-4" style="color: var(--color-text-secondary);">
+          <p>Keine Daten verfügbar. Bitte passen Sie die Filter an.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Keine Daten (allgemein) -->
+    <div *ngIf="!isLoading && airqualityData.length === 0 && viewMode === 'table'" class="text-center" style="color: var(--color-text-secondary);">
+      <p>Keine Daten verfügbar. Bitte passen Sie die Filter an.</p>
+    </div>
+  </div>
+</div>

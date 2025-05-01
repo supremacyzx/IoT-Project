@@ -1,0 +1,43 @@
+<div class="h-full flex flex-col p-2 pt-4 bg-background-secondary">
+  <!-- The pt-4 adds 1rem (16px) padding to the top -->
+  <div class="flex flex-col space-y-2 flex-grow">
+  <a
+    routerLink="/dashboard"
+    routerLinkActive="active-link"
+    class="route-link"
+  >
+    <i-lucide [name]=icons.House [size]="16" [strokeWidth]="2" class="text-icon"></i-lucide>
+    Dashboard
+  </a>
+  <a
+    routerLink="/sensory"
+    routerLinkActive="active-link"
+    class="route-link"
+  >
+    <i-lucide [name]=icons.Activity [size]="16" [strokeWidth]="2" class="text-icon"></i-lucide>
+    Sensoren
+  </a>
+  <a
+    routerLink="/settings"
+    routerLinkActive="active-link"
+    class="route-link"
+  >
+    <i-lucide [name]=icons.Cog [size]="16" [strokeWidth]="2" class="text-icon"></i-lucide>
+    Settings
+  </a>
+  </div>
+
+<!--  &lt;!&ndash; Bottom section &ndash;&gt;
+  <div class="mt-auto flex flex-col space-y-2">
+  <a
+    routerLink="/User"
+    routerLinkActive="active-link"
+    class="route-link"
+  >
+    <div class="user-icon-container flex items-center justify-start w-full">
+      <i-lucide [name]=icons.User [size]="16" [strokeWidth]="2" class="text-icon"></i-lucide>
+    </div>
+    <span class="text-sm">Sign In</span>
+  </a>
+  </div>-->
+</div>

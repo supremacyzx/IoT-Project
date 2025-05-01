@@ -1,1 +1,10 @@
-<router-outlet></router-outlet>
+<div class="flex flex-col h-screen">
+  <div class="flex flex-1 overflow-hidden">
+    <!-- Sidebar nur anzeigen, wenn der Benutzer authentifiziert ist -->
+    <app-sidebar *ngIf="isAuthenticated" class="w-38"></app-sidebar>
+
+    <div class="flex-1 p-4 overflow-auto app-content">
+      <router-outlet></router-outlet>
+    </div>
+  </div>
+</div>

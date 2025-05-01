@@ -1,0 +1,9 @@
+.airquality-chart {
+  width: 100% !important;
+  height: 100% !important;
+  background-color: var(--color-background-secondary); // Hintergrundfarbe des Charts
+  border: var(--border-width) var(--border-style) var(--color-border); // Rahmen wie bei der Tabelle
+  border-radius: var(--border-radius); // Abgerundete Ecken
+  padding: 16px; // Innenabstand
+  box-sizing: border-box; // Padding wird in die Größe einbezogen
+}

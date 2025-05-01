@@ -1,0 +1,63 @@
+:host {
+  display: block;
+  height: 100%;
+  width: 100%;
+  background-color: var(--color-background);
+  color: var(--color-text);
+  font-family: var(--font-family);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.min-h-screen {
+  min-height: 100vh;
+}
+
+// Überschreibe Tailwind-Klassen mit unseren Designvariablen
+.bg-gray-100 {
+  background-color: var(--color-background);
+}
+
+.bg-white {
+  background-color: var(--color-background-secondary);
+}
+
+.text-gray-800 {
+  color: var(--color-text);
+}
+
+.text-gray-700 {
+  color: var(--color-text-secondary);
+}
+
+.text-red-600 {
+  color: var(--color-error);
+}
+
+.border-gray-300 {
+  border-color: var(--color-border);
+}
+
+.shadow-md {
+  box-shadow: var(--shadow-md);
+}
+
+.focus\:ring-blue-500:focus {
+  box-shadow: 0 0 0 2px rgba(var(--color-primary-rgb), 0.25);
+}
+
+.bg-blue-600 {
+  background-color: var(--color-primary);
+}
+
+.hover\:bg-blue-700:hover {
+  background-color: var(--color-primary-hover);
+}
+
+.focus\:ring-blue-500:focus {
+  box-shadow: 0 0 0 2px rgba(var(--color-primary-rgb), 0.4);
+}
+
+input, button {
+  transition: all var(--transition-fast);
+}

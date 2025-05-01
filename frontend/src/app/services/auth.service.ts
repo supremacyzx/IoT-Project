@@ -1,119 +1,72 @@
-import { Injectable, signal } from '@angular/core';
-import { HttpErrorResponse } from '@angular/common/http';
-import { Observable, catchError, tap, throwError, switchMap } from 'rxjs';
-import { ApiService } from './api.service';
-import { UserProfile } from '../../models/userProfile.model';
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
+import { catchError, map, tap } from 'rxjs/operators';
+import { Router } from '@angular/router';
+
+export interface LoginRequest {
+  username: string;
+  password: string;
+}
+
+export interface LoginResponse {
+  access_token: string;
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  // Signals
-  authError = signal<string | null>(null);
-  isLoading = signal<boolean>(false);
-  userProfile = signal<UserProfile | null>(null);
+  private readonly TOKEN_KEY = 'auth_token';
+  private readonly API_URL = 'http://localhost:5000';
 
-  constructor(private apiService: ApiService) {
-  }
+  private isAuthenticatedSubject = new BehaviorSubject<boolean>(this.hasToken());
+  public isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
 
-  // Getter für isAuthenticated, der den Wert aus apiService verwendet
-  get isAuthenticated() {
-    return this.apiService.isAuthenticated;
-  }
+  constructor(private http: HttpClient, private router: Router) { }
 
-  login(username: string, password: string): Observable<any> {
-    this.isLoading.set(true);
-    this.authError.set(null);
-
-    // Erst den Health-Status prüfen
-    return this.apiService.checkHealth().pipe(
-      switchMap(() => {
-        // Falls Backend nicht erreichbar, Error auslösen
-        if (!this.apiService.isBackendHealthy()) {
-          throw new HttpErrorResponse({
-            error: { message: this.apiService.connectionError() || 'Backend ist nicht erreichbar' },
-            status: 0,
-            statusText: 'Backend nicht erreichbar'
-          });
-        }
-
-        return this.apiService.login(username, password);
-      }),
-      tap(() => {
-        this.isLoading.set(false);
-
-        // Fetch user profile immediately after login
-        this.getProfile().subscribe({
-          next: (profile) => this.userProfile.set(profile),
-          error: () => this.userProfile.set(null) // Clear profile on error
-        });
-      }),
-      catchError((error: HttpErrorResponse) => {
-        this.isLoading.set(false);
-
-        if (error.status === 0) {
-          // Verbindungsfehler
-          this.authError.set(error.error?.message || 'Verbindung zum Backend nicht möglich');
-        } else if (error.status === 401) {
-          const attemptsRemaining = error.error?.attempts_remaining;
-          const errorMessage = error.error?.message || 'Benutzername oder Passwort ungültig';
-
-          if (attemptsRemaining !== undefined) {
-            this.authError.set(`${errorMessage}. Verbleibende Versuche: ${attemptsRemaining}`);
-          } else {
-            this.authError.set(errorMessage);
+  login(credentials: LoginRequest): Observable<boolean> {
+    return this.http.post<LoginResponse>(`${this.API_URL}/login`, credentials)
+      .pipe(
+        tap(response => {
+          this.setToken(response.access_token);
+          this.isAuthenticatedSubject.next(true);
+        }),
+        map(() => true),
+        catchError(error => {
+          if (error.status === 401) {
+            return throwError(() => new Error('Ungültige Anmeldeinformationen'));
+          } else if (error.status === 429) {
+            return throwError(() => new Error('Zu viele fehlgeschlagene Anmeldeversuche'));
           }
-        } else if (error.status === 429) {
-          this.authError.set('Zu viele Anmeldeversuche. Bitte versuchen Sie es später erneut.');
-        } else {
-          this.authError.set('Bei der Anmeldung ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.');
-        }
-
-        return throwError(() => error);
-      })
-    );
+          return throwError(() => new Error('Ein Fehler ist aufgetreten'));
+        })
+      );
   }
 
   logout(): void {
-    this.apiService.logout();
-    this.userProfile.set(null);
+    localStorage.removeItem(this.TOKEN_KEY);
+    this.isAuthenticatedSubject.next(false);
+    this.router.navigate(['/auth']);
   }
 
-  getProfile(): Observable<UserProfile> {
-    this.isLoading.set(true);
+  getToken(): string | null {
+    return localStorage.getItem(this.TOKEN_KEY);
+  }
 
-    // Health-Check vor Profil-Abruf
-    return this.apiService.checkHealth().pipe(
-      switchMap(() => {
-        if (!this.apiService.isBackendHealthy()) {
-          throw new HttpErrorResponse({
-            error: { message: this.apiService.connectionError() || 'Backend ist nicht erreichbar' },
-            status: 0,
-            statusText: 'Backend nicht erreichbar'
-          });
-        }
+  private setToken(token: string): void {
+    localStorage.setItem(this.TOKEN_KEY, token);
+  }
 
-        return this.apiService.getUserProfile();
-      }),
-      tap(profile => {
-        this.userProfile.set(profile);
-        this.isLoading.set(false);
-      }),
-      catchError((error: HttpErrorResponse) => {
-        this.isLoading.set(false);
+  private hasToken(): boolean {
+    return !!this.getToken();
+  }
 
-        if (error.status === 0) {
-          this.authError.set('Backend nicht erreichbar. Bitte versuchen Sie es später erneut.');
-        } else if (error.status === 401) {
-          this.authError.set('Authentifizierung abgelaufen. Bitte melden Sie sich erneut an.');
-          this.logout();
-        } else {
-          this.authError.set('Profil konnte nicht abgerufen werden. Bitte versuchen Sie es erneut.');
-        }
-
-        return throwError(() => error);
-      })
-    );
+  isLoggedIn(): Observable<boolean> {
+    if (!this.hasToken()) {
+      return of(false);
+    }
+    // Hier könnte man optional einen Token-Validierungsendpunkt abfragen
+    return of(true);
   }
 }
-

@@ -1,20 +1,20 @@
 .dashboard-container {
-  padding: 20px;
-  max-width: 1000px;
-  margin: 0 auto;
-  background-color: #f7f9fc;
-  border-radius: 10px;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+  width: 100%;
+  max-width: 1200px; // Begrenzt die maximale Breite
+  margin: 0 auto; // Zentriert den Container
+  padding: var(--spacing-md);
 }
 
 .stacks-section {
-  margin-top: 40px;
+  margin: var(--spacing-xl) 0;
+
+  // Responsives Verhalten
+  @media (max-width: 768px) {
+    margin: var(--spacing-lg) 0;
+  }
 }
 
-.stack-container {
-  margin-bottom: 50px;
-  padding: 15px;
-  background-color: white;
-  border-radius: 15px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+// Zusätzlicher Abstand zwischen den Slideshows
+app-slideshow + app-slideshow {
+  margin-top: var(--spacing-lg);
 }

@@ -1,17 +1,545 @@
-@import "tailwindcss";
+@use "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 html, body {
   margin: 0;
   padding: 0;
   height: 100svh;
   font-size: 100%;
-  background-color: #000000;
-  font-family: 'Inter', sans-serif;
-  color: #f8f9fa;
 }
 
 * {
   box-sizing: border-box;
-  user-select: none;
+  /*  user-select: none;*/
+}
+
+/* 🌐 Theme Variables */
+:root {
+  /* 🌕 Light Mode */
+  --color-background: #ffffff;
+  --color-background-secondary: #f8f9fa;
+  --color-background-tertiary: rgba(248, 249, 250, 0.7);
+  --color-background-hover: rgba(248, 249, 250, 0.9);
+  --color-background-selected: rgba(0, 123, 255, 0.05);
+  --color-surface: #f1f3f5;
+  --color-overlay: rgba(0, 0, 0, 0.1);
+
+  /* Scrollbar Colors - Light Mode */
+  --scrollbar-track: #f1f1f1;
+  --scrollbar-thumb: #c1c1c1;
+  --scrollbar-thumb-hover: #a1a1a1;
+
+  /* Color with RGB values for alpha operations */
+  --color-primary-rgb: 0, 123, 255;
+  --color-border-rgb: 222, 226, 230;
+
+  /* Windowbar - Light Mode */
+  --color-windowbar-bg: #f0f0f0;
+  --color-windowbar-urlbar: #e8e8e8;
+  --color-windowbar-text: #212529;
+  --color-windowbar-text-secondary: #6c757d;
+  --color-windowbar-icon: #6e6e6e;
+  --color-windowbar-icon-hover: #2f2f2f;
+  --color-windowbar-icon-shield: #17a2b8;
+
+  /* Sidebar - Light Mode */
+  --color-sidebar-bg: #f5f5f5;
+  --color-sidebar-nav: transparent;
+  --color-sidebar-nav-active: #e0e0e0;
+  --color-sidebar-nav-hover: #d6d6d6;
+  --color-sidebar-nav-active-hover: #cfcfcf;
+
+  /* macOS - Light Mode */
+  --color-windowbar-close: #ff605c;
+  --color-windowbar-minimize: #ffbd44;
+  --color-windowbar-maximize: #00ca4e;
+
+  /* Icons - Light Mode*/
+  --color-icon: #6c757d;
+  --color-text: #212529;
+  --color-text-secondary: #6c757d;
+  --color-text-muted: #adb5bd;
+  --color-text-inverted: #ffffff;
+
+  --color-primary: #007bff;
+  --color-primary-hover: #0056b3;
+  --color-primary-active: #004085;
+
+  --color-secondary: #6c757d;
+  --color-secondary-hover: #5a6268;
+  --color-secondary-active: #545b62;
+
+  --color-accent: #e83e8c;
+  --color-accent-hover: #d63384;
+  --color-accent-active: #c2185b;
+
+  --color-success: #28a745;
+  --color-warning: #ffc107;
+  --color-error: #dc3545;
+  --color-info: #17a2b8;
+
+  --color-border: #dee2e6;
+  --color-border-hover: #b8c2cc;
+  --border-radius: 8px;
+  --border-width: 1px;
+  --border-style: solid;
+
+  --shadow-sm: 0px 2px 4px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0px 6px 12px rgba(0, 0, 0, 0.15);
+
+  --gradient-primary: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+  --gradient-accent: linear-gradient(135deg, #e83e8c 0%, #c2185b 100%);
+
+  --opacity-hover: 0.8;
+  --opacity-disabled: 0.5;
+
+  --font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  --font-size-sm: 12px;
+  --font-size-md: 16px;
+  --font-size-lg: 20px;
+  --font-weight-light: 300;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --line-height: 1.6;
+  --letter-spacing: -0.011em;
+
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+
+  --transition-fast: 0.2s ease-in-out;
+  --transition-medium: 0.4s ease-in-out;
+  --transition-slow: 0.6s ease-in-out;
+}
+
+.dark-theme {
+  /* 🌑 Dark Mode */
+  --color-background: #121212;
+  --color-background-secondary: #1a1a1a;
+  --color-background-tertiary: rgba(26, 26, 26, 0.7);
+  --color-background-hover: rgba(26, 26, 26, 0.9);
+  --color-background-selected: rgba(30, 144, 255, 0.1);
+  --color-surface: #1e1e1e;
+  --color-overlay: rgba(255, 255, 255, 0.05);
+
+  /* Scrollbar Colors - Dark Mode */
+  --scrollbar-track: #1a1a1a;
+  --scrollbar-thumb: #444444;
+  --scrollbar-thumb-hover: #555555;
+
+  /* Color with RGB values for alpha operations */
+  --color-primary-rgb: 30, 144, 255;
+  --color-border-rgb: 36, 36, 36;
+
+  /* Windowbar */
+  --color-windowbar-bg: #111111;
+  --color-windowbar-urlbar: #2a2a2a;
+  --color-windowbar-text: #f8f9fa;
+  --color-windowbar-text-secondary: #b0b0b0;
+  --color-windowbar-icon: #bebbc5;
+  --color-windowbar-icon-hover: #d7d7d8;
+  --color-windowbar-icon-shield: #17a2b8;
+
+  /* Sidebar */
+  --color-sidebar-bg: #151515;
+  --color-sidebar-nav: transparent;
+  --color-sidebar-nav-active: #2a2a2a;
+  --color-sidebar-nav-hover: #2a2a2a;
+  --color-sidebar-nav-active-hover: #232323;
+
+  /* macOS */
+  --color-windowbar-close: #ff605c;
+  --color-windowbar-minimize: #ffbd44;
+  --color-windowbar-maximize: #00ca4e;
+
+  /* Icons */
+  --color-icon: #b0b0b0;
+
+  --color-text: #f8f9fa;
+  --color-text-secondary: #b0b0b0;
+  --color-text-muted: #6c757d;
+  --color-text-inverted: #212529;
+
+  --color-primary: #1e90ff;
+  --color-primary-hover: #1c7ed6;
+  --color-primary-active: #1864ab;
+
+  --color-secondary: #adb5bd;
+  --color-secondary-hover: #868e96;
+  --color-secondary-active: #495057;
+
+  --color-accent: #ff4081;
+  --color-accent-hover: #d81b60;
+  --color-accent-active: #b0003a;
+
+  --color-success: #28a745;
+  --color-warning: #ffc107;
+  --color-error: #dc3545;
+  --color-info: #17a2b8;
+
+  --color-border: #242424;
+  --color-border-hover: #3a3a3a;
+
+  --shadow-sm: 0px 2px 4px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0px 4px 8px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0px 6px 12px rgba(0, 0, 0, 0.4);
+
+  --gradient-primary: linear-gradient(135deg, #1e90ff 0%, #1864ab 100%);
+  --gradient-accent: linear-gradient(135deg, #ff4081 0%, #b0003a 100%);
+}
+
+html {
+  &.dark-theme {
+    @extend .dark-theme;
+  }
+}
+
+/* 🖥️ UI Elements */
+body {
+  font-family: var(--font-family);
+  font-size: var(--font-size-md);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  text-rendering: optimizeLegibility;
+}
+
+/* Custom Scrollbar Styling */
+/* For Webkit browsers (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 4px;
+  transition: background var(--transition-fast);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
+
+::-webkit-scrollbar-corner {
+  background: var(--scrollbar-track);
+}
+
+/* For Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+
+/* Thin scrollbars for specific containers */
+.thin-scrollbar::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+/* Hide scrollbars but keep functionality */
+.hide-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;  /* Chrome, Safari and Opera */
+}
+
+/* Custom styling for range inputs (sliders) */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  background: var(--scrollbar-track);
+  border-radius: 3px;
+  outline: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  cursor: pointer;
+  transition: background var(--transition-fast), transform var(--transition-fast);
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border: none;
+  border-radius: 50%;
+  background: var(--color-primary);
+  cursor: pointer;
+  transition: background var(--transition-fast), transform var(--transition-fast);
+}
+
+input[type="range"]::-webkit-slider-thumb:hover,
+input[type="range"]::-moz-range-thumb:hover {
+  background: var(--color-primary-hover);
+  transform: scale(1.1);
+}
+
+input[type="range"]::-webkit-slider-thumb:active,
+input[type="range"]::-moz-range-thumb:active {
+  background: var(--color-primary-active);
+  transform: scale(0.95);
+}
+
+/* Fix for window-titlebar */
+.window-titlebar {
+  background-color: var(--color-windowbar-bg);
+  border-bottom: var(--border-width) var(--border-style) var(--color-border);
+  transition: background-color var(--transition-medium), color var(--transition-medium);
+}
+
+/* Fix for sidebar component */
+app-sidebar {
+  background-color: var(--color-sidebar-bg);
+  box-shadow: var(--shadow-sm);
+  transition: background-color var(--transition-medium), color var(--transition-medium);
+}
+
+.app-content {
+  background-color: var(--color-background);
+  transition: background-color var(--transition-medium), color var(--transition-medium);
+}
+
+/* Overflow containers */
+.overflow-container {
+  overflow: auto;
+  border-radius: var(--border-radius);
+  padding-right: 4px; /* Add some padding to prevent content from touching scrollbar */
+}
+
+.overflow-x-container {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.overflow-y-container {
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* 🎨 Buttons */
+button {
+  background: transparent;
+  color: var(--color-text-inverted);
+  border: var(--border-width) var(--border-style) var(--color-border);
+  border-radius: var(--border-radius);
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color var(--transition-fast),
+  border-color var(--transition-fast),
+  color var(--transition-fast),
+  box-shadow var(--transition-fast);
+}
+
+button:hover {
+  background: var(--color-background-secondary);
+  border-color: var(--color-primary-hover);
+}
+
+button:focus-visible {
+  outline: none;
+  border-color: var(--color-primary-hover);
+  box-shadow: 0 0 0 2px var(--color-background-secondary);
+}
+
+button:active {
+  background: var(--color-background);
+  border-color: var(--color-primary-active);
+  transform: translateY(1px);
+}
+
+button:disabled {
+  opacity: var(--opacity-disabled);
+  cursor: not-allowed;
+  border-color: var(--color-border);
+  background: transparent;
+}
+
+/* Primary button variant */
+button.primary {
+  background: var(--color-background-secondary);
+  color: var(--color-text-inverted);
+  border-color: var(--color-background-secondary);
+}
+
+button.primary:hover {
+  background: var(--color-primary-hover);
+  border-color: var(--color-primary-hover);
+}
+
+button.primary:active {
+  background: var(--color-primary-active);
+  border-color: var(--color-primary-active);
+}
+
+/* 🎨 Inputs */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="search"],
+input[type="tel"],
+input[type="url"],
+textarea,
+select {
+  background: transparent;
+  color: var(--color-text-inverted);
+  border: var(--border-width) var(--border-style) var(--color-border);
+  border-radius: var(--border-radius);
+  padding: 0.5rem 0.75rem;
+  width: 100%;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+input:hover,
+textarea:hover,
+select:hover {
+  border-color: var(--color-primary-hover);
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: var(--color-primary-hover);
+  box-shadow: 0 0 0 2px var(--color-background-secondary);
+}
+
+input:disabled,
+textarea:disabled,
+select:disabled {
+  opacity: var(--opacity-disabled);
+  cursor: not-allowed;
+  background: var(--color-background);
+}
+
+/* Placeholder styling */
+::placeholder {
+  color: var(--color-border);
+  opacity: 1;
+}
+
+/* 🎨 Checkboxes */
+input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 1rem;
+  height: 1rem;
+  border: var(--border-width) var(--border-style) var(--color-border);
+  border-radius: calc(var(--border-radius) / 2);
+  background: transparent;
+  position: relative;
+  cursor: pointer;
+  vertical-align: middle;
+  transition: background-color var(--transition-fast),
+  border-color var(--transition-fast);
+}
+
+input[type="checkbox"]:hover {
+  border-color: var(--color-primary-hover);
+}
+
+input[type="checkbox"]:checked {
+  background-color: var(--color-background-secondary);
+  border-color: var(--color-background-secondary);
+}
+
+input[type="checkbox"]:checked::after {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 1px;
+  width: 4px;
+  height: 8px;
+  border: solid var(--color-primary);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+input[type="checkbox"]:focus {
+  outline: none;
+  border-color: var(--color-primary-hover);
+  box-shadow: 0 0 0 2px var(--color-background-secondary);
+}
+
+input[type="checkbox"]:disabled {
+  opacity: var(--opacity-disabled);
+  cursor: not-allowed;
+}
+
+/* Custom checkbox with label */
+.checkbox-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.checkbox-container input[type="checkbox"] {
+  margin: 0;
+}
+
+.checkbox-container:hover input[type="checkbox"] {
+  border-color: var(--color-primary-hover);
+}
+
+/* Toggle switch (styled checkbox) */
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 2.5rem;
+  height: 1.25rem;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* Router Animation Styles */
+main {
+  position: relative;
+  overflow: hidden;
+  display: block;
+  min-height: 100vh;
+  width: 100%;
+}
+
+router-outlet {
+  position: absolute;
+}
+
+/* ⚡ Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+  animation: fadeIn var(--transition-medium) ease-in-out;
 }
 
