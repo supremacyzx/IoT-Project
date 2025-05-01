@@ -36,6 +36,7 @@ export class AirqualityComponent implements OnInit, AfterViewInit, OnDestroy {
   private loadingDelay = 300;
   skeletonArray = Array(30).fill(0); // Beibehalten für Table-Skeleton-Loading
   private chart: Chart | null = null;
+  private lastProcessedDataId: string | number | null = null;
 
   constructor(private airqualityService: AirqualityService) {
     Chart.register(...registerables);
@@ -48,9 +49,34 @@ export class AirqualityComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // Abonniere Echtzeitdaten
     this.airqualityService.airqualityData$.subscribe((data) => {
-      this.airqualityData = data;
-      if (this.viewMode === 'graph') {
-        this.renderChart();
+      if (data.length > 0) {
+        const newestEntry = data[0];
+        // Prüfe, ob neue Daten vorhanden sind, die wir noch nicht verarbeitet haben
+        const isNewData = this.lastProcessedDataId === null ||
+                         (newestEntry.id !== undefined && newestEntry.id !== this.lastProcessedDataId);
+
+        this.airqualityData = data;
+
+        if (this.viewMode === 'graph') {
+          if (isNewData && this.chart) {
+            // Nur den neuen Wert zum bestehenden Graphen hinzufügen
+            this.updateChartWithNewData(newestEntry);
+            // Speichere die ID, damit wir diesen Eintrag nicht erneut verarbeiten
+            this.lastProcessedDataId = newestEntry.id ?? null;
+          } else if (!this.chart) {
+            // Nur initial den Chart komplett rendern
+            this.renderChart();
+            if (newestEntry.id !== undefined) {
+              this.lastProcessedDataId = newestEntry.id;
+            } else {
+              this.lastProcessedDataId = null;
+            }
+          }
+        }
+
+        if (newestEntry) {
+          this.latestEntry = newestEntry;
+        }
       }
     });
   }
@@ -131,16 +157,38 @@ export class AirqualityComponent implements OnInit, AfterViewInit, OnDestroy {
   setView(view: 'table' | 'graph'): void {
     this.viewMode = view;
     if (view === 'graph' && this.airqualityData.length > 0) {
-      setTimeout(() => this.renderChart(), 0);
+      // Bei Wechsel zur Graphenansicht vollständig neu rendern
+      setTimeout(() => {
+        this.lastProcessedDataId = null; // Reset für konsistenten Zustand
+        this.renderChart();
+        // Speichere die aktuelle ID des neuesten Eintrags
+        if (this.airqualityData.length > 0 && this.airqualityData[0].id !== undefined) {
+          this.lastProcessedDataId = this.airqualityData[0].id;
+        } else {
+          this.lastProcessedDataId = null;
+        }
+      }, 0);
     }
   }
 
   setLimit(limit: number): void {
+    const oldLimit = this.filters.limit;
     this.filters.limit = limit;
     this.airqualityService.setDataLimit(limit);
+
     this.loadFilteredData().then(() => {
       if (this.viewMode === 'graph' && this.airqualityData.length > 0) {
-        setTimeout(() => this.renderChart(), 0);
+        // Bei Änderung des Limits vollständig neu rendern
+        setTimeout(() => {
+          this.lastProcessedDataId = null; // Reset für konsistenten Zustand
+          this.renderChart();
+          // Speichere die aktuelle ID des neuesten Eintrags
+          if (this.airqualityData.length > 0 && this.airqualityData[0].id !== undefined) {
+            this.lastProcessedDataId = this.airqualityData[0].id;
+          } else {
+            this.lastProcessedDataId = null;
+          }
+        }, 0);
       }
     });
   }
@@ -163,12 +211,15 @@ export class AirqualityComponent implements OnInit, AfterViewInit, OnDestroy {
     // Beschränke die Daten auf die berechnete Anzahl
     const limitedData = this.airqualityData.slice(0, displayLimit);
 
-    // Kopiere und kehre die Daten für die Grafik um
-    const reversedData = [...limitedData].reverse();
+    // Sortiere die Daten chronologisch (älteste zuerst, neueste zuletzt),
+    // damit sie von links nach rechts angezeigt werden
+    const sortedData = [...limitedData].sort((a, b) => {
+      return new Date(a.lastUpdate).getTime() - new Date(b.lastUpdate).getTime();
+    });
 
-    const labels = reversedData.map(entry => new Date(entry.lastUpdate).toLocaleString());
-    const temperatureData = reversedData.map(entry => entry.temperature);
-    const humidityData = reversedData.map(entry => entry.humidity);
+    const labels = sortedData.map(entry => new Date(entry.lastUpdate).toLocaleString());
+    const temperatureData = sortedData.map(entry => entry.temperature);
+    const humidityData = sortedData.map(entry => entry.humidity);
 
     // Farben aus CSS-Variablen für konsistentes Styling
     const getComputedStyle = window.getComputedStyle(document.documentElement);
@@ -316,6 +367,55 @@ export class AirqualityComponent implements OnInit, AfterViewInit, OnDestroy {
         },
       },
     });
+  }
+
+  private updateChartWithNewData(newEntry: Airquality): void {
+    if (!this.chart || !this.chart.data.datasets) return;
+
+    // Neues Label für die X-Achse
+    const newLabel = new Date(newEntry.lastUpdate).toLocaleString();
+
+    // Aktuelle Zeitstempel im Chart
+    const existingTimestamps = this.chart.data.labels?.map(label =>
+      typeof label === 'string' ? new Date(label).getTime() : 0
+    ) || [];
+
+    // Neuer Zeitstempel
+    const newTimestamp = new Date(newEntry.lastUpdate).getTime();
+
+    // Falls der neue Wert zeitlich nach dem letzten Wert im Chart liegt, füge ihn am Ende hinzu
+    if (existingTimestamps.length === 0 || newTimestamp > existingTimestamps[existingTimestamps.length - 1]) {
+      // Füge neue Daten am ENDE hinzu (neuester Eintrag kommt rechts)
+      this.chart.data.labels?.push(newLabel);
+      this.chart.data.datasets[0].data.push(newEntry.temperature);
+      this.chart.data.datasets[1].data.push(newEntry.humidity);
+    }
+    // Falls der neue Wert zeitlich vor dem ersten Wert im Chart liegt, füge ihn am Anfang hinzu
+    else if (newTimestamp < existingTimestamps[0]) {
+      this.chart.data.labels?.unshift(newLabel);
+      this.chart.data.datasets[0].data.unshift(newEntry.temperature);
+      this.chart.data.datasets[1].data.unshift(newEntry.humidity);
+    }
+    // Ansonsten müssten wir ihn an der richtigen Stelle einfügen (komplexerer Fall)
+    else {
+      // Dieser Fall ist selten, daher können wir zur Vereinfachung einfach den Chart neu rendern
+      this.renderChart();
+      return;
+    }
+
+    // Beschränke die Anzahl der angezeigten Datenpunkte auf das festgelegte Limit
+    const displayLimit = this.filters.limit === 1 ? 2 : this.filters.limit;
+
+    if (this.chart.data.labels && this.chart.data.labels.length > displayLimit) {
+      // Schneide überschüssige Daten vom ANFANG ab (älteste Daten entfernen)
+      this.chart.data.labels = this.chart.data.labels.slice(-displayLimit);
+      this.chart.data.datasets.forEach(dataset => {
+        dataset.data = dataset.data.slice(-displayLimit);
+      });
+    }
+
+    // Aktualisiere den Chart ohne Animation für bessere Performance
+    this.chart.update('none');
   }
 
   formatTimeAgo(dateStr: string | Date): string {
