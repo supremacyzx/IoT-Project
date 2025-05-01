@@ -251,6 +251,56 @@ String getConfigAsString() {
   return configString;
 }
 
+void updateConfigFromJson(const String& jsonString) {
+  StaticJsonDocument<512> doc;
+  DeserializationError error = deserializeJson(doc, jsonString);
+
+  if (error) {
+    Serial.print(F("deserializeJson() failed: "));
+    Serial.println(error.f_str());
+    return;
+  }
+
+  // WiFi settings
+  if (doc.containsKey("wifi")) {
+    JsonObject wifi = doc["wifi"];
+    if (wifi.containsKey("ssid")) config.ssid = wifi["ssid"].as<String>();
+    if (wifi.containsKey("password")) config.password = wifi["password"].as<String>();
+    if (wifi.containsKey("enabled")) config.useWifi = wifi["enabled"];
+  }
+
+  // MQTT settings
+  if (doc.containsKey("mqtt")) {
+    JsonObject mqtt = doc["mqtt"];
+    if (mqtt.containsKey("broker")) config.broker = mqtt["broker"].as<String>();
+    if (mqtt.containsKey("port")) config.port = mqtt["port"];
+    if (mqtt.containsKey("mqttUser")) config.mqttUser = mqtt["mqttUser"].as<String>();
+    if (mqtt.containsKey("mqttPass")) config.mqttPass = mqtt["mqttPass"].as<String>();
+    if (mqtt.containsKey("mqttID")) config.mqttID = mqtt["mqttID"].as<String>();
+  }
+
+  // Pin configuration
+  if (doc.containsKey("pins")) {
+    JsonObject pins = doc["pins"];
+    if (pins.containsKey("ledGreen")) config.ledGreenPin = pins["ledGreen"];
+    if (pins.containsKey("ledRed")) config.ledRedPin = pins["ledRed"];
+    if (pins.containsKey("dht")) config.dhtPin = pins["dht"];
+    if (pins.containsKey("rfidSS")) config.rfidSSPin = pins["rfidSS"];
+    if (pins.containsKey("sda")) config.sdaPin = pins["sda"];
+    if (pins.containsKey("scl")) config.sclPin = pins["scl"];
+    if (pins.containsKey("buzzerpin")) config.buzzerpin = pins["buzzerpin"];
+  }
+
+  // Sensor configuration
+  if (doc.containsKey("sensors")) {
+    JsonObject sensors = doc["sensors"];
+    if (sensors.containsKey("dhtType")) config.dhtType = sensors["dhtType"];
+    if (sensors.containsKey("lcdAddress")) config.lcdAddress = sensors["lcdAddress"];
+    if (sensors.containsKey("lcdCols")) config.lcdCols = sensors["lcdCols"];
+    if (sensors.containsKey("lcdRows")) config.lcdRows = sensors["lcdRows"];
+  }
+}
+
 
 
 bool loadAccessIds() {
@@ -330,6 +380,67 @@ bool saveAccessIds() {
   return true;
 }
 
+bool addNewAccessId() {
+  Serial.println("Waiting for new card to add to access list...");
+  
+  // Wait for a card to be scanned
+  String newCardId = "";
+  unsigned long startTime = millis();
+  const unsigned long timeout = 30000; // 30 seconds timeout
+  
+  while (millis() - startTime < timeout) {
+    // Check if there's a new card ID available
+    // This part depends on how you're reading your RFID cards
+    // Replace this with your actual RFID reading code
+    if (mfrc522->PICC_IsNewCardPresent() && mfrc522->PICC_ReadCardSerial()) {
+      // Convert UID to hex string
+      newCardId = readCard();
+      
+      Serial.print("Card read: ");
+      Serial.println(newCardId);
+      break;
+    }
+    
+    delay(50); // Small delay to prevent overwhelming the CPU
+  }
+  
+  if (newCardId.length() == 0) {
+    Serial.println("Timeout: No card read");
+    return false;
+  }
+  
+  // Check if this card is already in the access list
+  for (int i = 0; i < num_access_ids; i++) {
+    if (access_ids[i].equalsIgnoreCase(newCardId)) {
+      Serial.println("Card already in access list");
+      return false;
+    }
+  }
+  
+  // Create a new array with increased size
+  String* new_access_ids = new String[num_access_ids + 1];
+  
+  // Copy existing IDs
+  for (int i = 0; i < num_access_ids; i++) {
+    new_access_ids[i] = access_ids[i];
+  }
+  
+  // Add the new ID
+  new_access_ids[num_access_ids] = newCardId;
+  
+  // Clean up old array and replace with new one
+  delete[] access_ids;
+  access_ids = new_access_ids;
+  num_access_ids++;
+  
+  Serial.print("Added new card to access list: ");
+  Serial.println(newCardId);
+  
+  // Save the updated list to the file
+  return saveAccessIds();
+}
+
+
 #pragma endregion
 
 #pragma region :: Custom Methods
@@ -392,16 +503,35 @@ void listenForMessages() {
 
     if (docmessage.containsKey("command") && docmessage.containsKey("msgID")) {
       String command = docmessage["command"];
-      // Do something with the command
       Serial.print("Received command: ");
       Serial.println(command);
+
+      // Specific command handling
       if (command == "getConfig"){
         String configString = getConfigAsString();
         Serial.println(configString);
-        String mqttMsg = '{"msgID":' + String(docmessage["msgID"]) + ',"command":"sendConfig", "value":' + configString + '}';
+        String mqttMsg = "";
+        DynamicJsonDocument mqttdoc(512);
+        mqttdoc["msgID"] = docmessage["msgID"];
+        mqttdoc["command"] = "configSend";
+        mqttdoc["value"] = configString;
+        serializeJson(mqttdoc, mqttMsg);
+        Serial.println(mqttMsg);
         publishMessage("RZ/config", mqttMsg);
         Serial.println("Sent config to RZ/config");
-      }
+      }elif (command == "setConfig"){
+        String configString = docmessage["value"];
+        updateConfigFromJson(configString);
+        Serial.println("Updated config from MQTT message");
+        saveConfig();
+        Serial.println("Saved config to file system");
+    }elif (command == "addAccessId"){
+        Serial.println("Adding new access ID...");
+        if (addNewAccessId()) {
+          Serial.println("New access ID added successfully");
+        } else {
+          Serial.println("Failed to add new access ID");
+        }
     }
   }
 }
