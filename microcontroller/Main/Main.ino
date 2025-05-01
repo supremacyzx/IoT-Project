@@ -525,7 +525,7 @@ void listenForMessages() {
         Serial.println("Updated config from MQTT message");
         saveConfig();
         Serial.println("Saved config to file system");
-    }elif (command == "addAccessId"){
+      }elif (command == "addAccessId"){
         Serial.println("Adding new access ID...");
         if (addNewAccessId()) {
           Serial.println("New access ID added successfully");

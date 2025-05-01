@@ -38,6 +38,7 @@ class MQTTClient:
         self.client.on_message = self.on_message
         self.socketio = socketio  # Store the socketio instance
         self.lastData = None
+        self.clients = None
         self.ws_bridge = None
         self.latest_data = {
             "tmp": None,
@@ -81,13 +82,15 @@ class MQTTClient:
                 
                 # Emit the updated data to all connected clients
                 if data_updated:
-                     if hasattr(self, 'ws_bridge') and self.ws_bridge is not None:
-                        self.ws_bridge.broadcast_message({
-                            "topic": msg.topic,
-                            "payload": data,
-                            "timestamp": time.time()
-                        })
-                
+                    try:
+                        message = f"Real data: {data}"
+                        for ws in self.clients[:]:
+                            try:
+                                ws.send(message)
+                            except:
+                                self.clients.remove(ws)
+                    except Exception as e:
+                        print(f"Error sending message to clients: {e}")
                 self.lastData = data
                 self.latest_data["last_insert"] = time.time()
             except Exception as e:
@@ -117,8 +120,9 @@ class MQTTClient:
         except Exception as e:
             print(f"Database insertion error: {e}")
 
-    def start(self):
+    def start(self, shared_clients):
         try:
+            self.clients = shared_clients
             self.client.connect(MQTT_BROKER, MQTT_PORT, MQTT_KEEPALIVE)
             self.client.loop_start()
             print(f"Connected to MQTT broker at {MQTT_BROKER}:{MQTT_PORT}")
