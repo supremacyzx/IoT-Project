@@ -67,7 +67,7 @@ def generate_mock_data():
 
 def send_to_clients():
     while True:
-        time.sleep(0.5)  # Sleep for 0.5 seconds to avoid overwhelming the clients
+        time.sleep(10)
         if clients is None:
             continue
         data = generate_mock_data()
