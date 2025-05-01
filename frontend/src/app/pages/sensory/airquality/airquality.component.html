@@ -77,7 +77,7 @@
               </th>
               <th scope="col" class="py-3 px-6 text-left font-medium" style="color: var(--color-text-secondary); border-bottom: var(--border-width) var(--border-style) var(--color-border);">
                 <div class="flex items-center">
-                  <i-lucide [name]="icons.Clock" [size]="16" [strokeWidth]="2" class="mr-2" style="color: var(--color-icon)"></i-lucide>
+                  <i-lucide [name]="icons.Clock" [size]="16" [strokeWidth]="2" class="mr-2" style="color: rgb(235,172,54);"></i-lucide>
                   <span class="uppercase text-xs">Letztes Update</span>
                 </div>
               </th>
@@ -109,10 +109,10 @@
                   'background-color: var(--color-background);' :
                   'background-color: var(--color-background-secondary);'">
               <td class="py-4 px-6 text-sm" style="color: var(--color-text); border-bottom: var(--border-width) var(--border-style) var(--color-border);">
-                {{ entry.temperature }} °C
+                {{ formatToOneDecimal(entry.temperature) }} °C
               </td>
               <td class="py-4 px-6 text-sm" style="color: var(--color-text); border-bottom: var(--border-width) var(--border-style) var(--color-border);">
-                {{ entry.humidity }} %
+                {{ formatToOneDecimal(entry.humidity) }} %
               </td>
               <td class="py-4 px-6 text-sm" style="color: var(--color-text); border-bottom: var(--border-width) var(--border-style) var(--color-border);">
                 {{ formatTimeAgo(entry.lastUpdate) }}
@@ -145,3 +145,4 @@
     </div>
   </div>
 </div>
+

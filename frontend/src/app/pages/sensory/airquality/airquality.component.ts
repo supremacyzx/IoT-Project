@@ -428,6 +428,10 @@ export class AirqualityComponent implements OnInit, AfterViewInit, OnDestroy {
     const now = new Date();
     const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
 
+    if (diffInSeconds < 1) {
+      return 'jetzt gerade'; // Deutsch: "just now"
+    }
+
     if (diffInSeconds < 60) {
       return `vor ${diffInSeconds} Sekunden`;
     }
@@ -459,6 +463,11 @@ export class AirqualityComponent implements OnInit, AfterViewInit, OnDestroy {
 
     const diffInYears = Math.floor(diffInDays / 365);
     return `vor ${diffInYears} Jahren`;
+  }
+
+  // Methode zum Formatieren von Zahlen auf eine Dezimalstelle
+  formatToOneDecimal(value: number): string {
+    return value.toFixed(1);
   }
 }
 
