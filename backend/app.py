@@ -223,6 +223,45 @@ def get_config():
         print("Error in API: ", e)
         return jsonify({'error': str(e)}), 500
 
+
+@app.route('/setConfig', methods=['POST'])
+@jwt_required()
+def set_config():
+    try:
+        configData = request.json
+        msgID = random.randint(0,100000)
+        
+        payload = {
+            "msgID": msgID,
+            "command": "setConfig",
+            "value": json.dumps(configData)  # Ensures it's a properly escaped JSON string
+        }
+        print("[MQTT] Sending: ",  str(json.dumps(payload)))
+        mqtt_client.send_message("RZ/config", str(json.dumps(payload)))
+        return ("OK",200)
+    except Exception as e:
+        print("Error in API: ", e)
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/addAccessID', methods=['POST'])
+@jwt_required()
+def add_access_id():
+    try:
+        msgID = random.randint(0,100000)
+        
+        payload = {
+            "msgID": msgID,
+            "command": "addAccessId",
+        }
+        print("[MQTT] Sending: ",  str(json.dumps(payload)))
+        mqtt_client.send_message("RZ/config", str(json.dumps(payload)))
+        return ("OK",200)
+    except Exception as e:
+        print("Error in API: ", e)
+        return jsonify({'error': str(e)}), 500
+
+
 @app.route('/data', methods=['GET'])
 @jwt_required()
 def get_data():
@@ -366,3 +405,7 @@ if __name__ == '__main__':
     
 
 #endregion :: __main__
+
+
+# Sample AddAccessId command MQTT msg: '{"msgID":1, "command":"addAccessId"}'
+# Sample Set Config command MQTT msg: '{"msgID":1, "command":"setConfig","value":"{\"pins\":{\"buzzerpin\":27}}"}'

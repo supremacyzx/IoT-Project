@@ -456,6 +456,11 @@ bool addNewAccessId() {
   Serial.println(newCardId);
   
   // Save the updated list to the file
+  lcd->clear();
+  lcd->print("Access card added");
+  accessSound(config.buzzerpin);
+  delay(1500);
+  lcd->clear();
   return saveAccessIds();
 }
 
