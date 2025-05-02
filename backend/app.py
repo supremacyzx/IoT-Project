@@ -210,14 +210,14 @@ def get_config():
         mqtt_client.send_message("RZ/config", r'{"command":"getConfig", "msgID":' + str(msgID) + '}')
         attempts = 0
         while True:
-            print(mqtt_client.configData)
             if attempts >= 200:
                 return jsonify({'error': 'Timeout waiting for MQTT msg'}), 500
             if mqtt_client.configData:
+                print(mqtt_client.configData)
                 if mqtt_client.configData["msgID"] == msgID:
                     return mqtt_client.configData
             attempts += 1
-            time.sleep(0.1)
+            time.sleep(0.5)
 
     except Exception as e:
         print("Error in API: ", e)
