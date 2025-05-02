@@ -96,9 +96,11 @@ class MQTTClient:
             except Exception as e:
                 print(f"Error processing MQTT message: {e}")
         elif msg.topic == MQTT_TOPIC_CONFIG:
+            print("Received data on config topic")
             try:
                 data = json.loads(msg.payload.decode())
-                if data["command"] == "sendConfig":
+                print("Command received: ",data["command"])
+                if data["command"] == "configSend":
                     self.configData = data
             except Exception as e:
                 print("Error parsing config: ", e)

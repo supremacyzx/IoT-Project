@@ -211,6 +211,25 @@ bool saveConfig() {
   return true;
 }
 
+
+
+String readCard() {
+  MFRC522Debug::PrintUID(Serial, (mfrc522->uid));
+  Serial.println();
+
+  // Save the UID on a String variable
+  String uidString = "";
+  for (byte i = 0; i < mfrc522->uid.size; i++) {
+    if (mfrc522->uid.uidByte[i] < 0x10) {
+      uidString += "0"; 
+    }
+    uidString += String(mfrc522->uid.uidByte[i], HEX);
+  }
+  Serial.println(uidString);
+  return uidString;
+}
+
+
 String getConfigAsString() {
 
   StaticJsonDocument<512> doc;
@@ -264,19 +283,19 @@ void updateConfigFromJson(const String& jsonString) {
   // WiFi settings
   if (doc.containsKey("wifi")) {
     JsonObject wifi = doc["wifi"];
-    if (wifi.containsKey("ssid")) config.ssid = wifi["ssid"].as<String>();
-    if (wifi.containsKey("password")) config.password = wifi["password"].as<String>();
+    if (wifi.containsKey("ssid")) strlcpy(config.ssid, wifi["ssid"], sizeof(config.ssid));
+    if (wifi.containsKey("password")) strlcpy(config.password, wifi["password"], sizeof(config.password));
     if (wifi.containsKey("enabled")) config.useWifi = wifi["enabled"];
   }
 
   // MQTT settings
   if (doc.containsKey("mqtt")) {
     JsonObject mqtt = doc["mqtt"];
-    if (mqtt.containsKey("broker")) config.broker = mqtt["broker"].as<String>();
+    if (mqtt.containsKey("broker")) strlcpy(config.broker, mqtt["broker"], sizeof(config.broker));
     if (mqtt.containsKey("port")) config.port = mqtt["port"];
-    if (mqtt.containsKey("mqttUser")) config.mqttUser = mqtt["mqttUser"].as<String>();
-    if (mqtt.containsKey("mqttPass")) config.mqttPass = mqtt["mqttPass"].as<String>();
-    if (mqtt.containsKey("mqttID")) config.mqttID = mqtt["mqttID"].as<String>();
+    if (mqtt.containsKey("mqttUser")) strlcpy(config.mqttUser, mqtt["mqttUser"], sizeof(config.mqttUser));
+    if (mqtt.containsKey("mqttPass")) strlcpy(config.mqttPass, mqtt["mqttPass"], sizeof(config.mqttPass));
+    if (mqtt.containsKey("mqttID")) strlcpy(config.mqttID, mqtt["mqttID"], sizeof(config.mqttID));
   }
 
   // Pin configuration
@@ -470,71 +489,7 @@ void alarmSound(int buzzerPin) {
   }
 
 
-  
-// Function to listen for incoming MQTT messages
-void listenForMessages() {
-  // Check if a message has arrived
-  int messageSize = mqttClient.parseMessage();
-  
-  if (messageSize > 0) {
-    // Message received
-    Serial.print("Received message on topic: ");
-    Serial.println(mqttClient.messageTopic());
-    
-    Serial.print("Message size: ");
-    Serial.println(messageSize);
-    
-    // Read and print the message content
-    Serial.print("Message content: ");
-    String msg = "";
-    while (mqttClient.available()) {
-      msg += (char)mqttClient.read();
 
-    }
-    Serial.println(msg);
-    StaticJsonDocument<200> docmessage;
-    DeserializationError error = deserializeJson(docmessage, msg);
-    
-    if (error) {
-      Serial.print("deserializeJson() failed: ");
-      Serial.println(error.c_str());
-      return;
-    }
-
-    if (docmessage.containsKey("command") && docmessage.containsKey("msgID")) {
-      String command = docmessage["command"];
-      Serial.print("Received command: ");
-      Serial.println(command);
-
-      // Specific command handling
-      if (command == "getConfig"){
-        String configString = getConfigAsString();
-        Serial.println(configString);
-        String mqttMsg = "";
-        DynamicJsonDocument mqttdoc(512);
-        mqttdoc["msgID"] = docmessage["msgID"];
-        mqttdoc["command"] = "configSend";
-        mqttdoc["value"] = configString;
-        serializeJson(mqttdoc, mqttMsg);
-        Serial.println(mqttMsg);
-        publishMessage("RZ/config", mqttMsg);
-        Serial.println("Sent config to RZ/config");
-      }elif (command == "setConfig"){
-        String configString = docmessage["value"];
-        updateConfigFromJson(configString);
-        Serial.println("Updated config from MQTT message");
-        saveConfig();
-        Serial.println("Saved config to file system");
-      }elif (command == "addAccessId"){
-        Serial.println("Adding new access ID...");
-        if (addNewAccessId()) {
-          Serial.println("New access ID added successfully");
-        } else {
-          Serial.println("Failed to add new access ID");
-        }
-    }
-  }
-}
 
 
 SensorData readDHTSensor() {
@@ -552,21 +507,6 @@ SensorData readDHTSensor() {
   return data;
 }
 
-String readCard() {
-  MFRC522Debug::PrintUID(Serial, (mfrc522->uid));
-  Serial.println();
-
-  // Save the UID on a String variable
-  String uidString = "";
-  for (byte i = 0; i < mfrc522->uid.size; i++) {
-    if (mfrc522->uid.uidByte[i] < 0x10) {
-      uidString += "0"; 
-    }
-    uidString += String(mfrc522->uid.uidByte[i], HEX);
-  }
-  Serial.println(uidString);
-  return uidString;
-}
 
 bool checkAccess(String id, bool armed) {
   Serial.println(id);
@@ -691,6 +631,76 @@ void initComponents() {
   pinMode(config.ledRedPin, OUTPUT);
   pinMode(config.buzzerpin, OUTPUT);
 }
+
+
+
+  
+// Function to listen for incoming MQTT messages
+void listenForMessages() {
+  // Check if a message has arrived
+  int messageSize = mqttClient.parseMessage();
+  
+  if (messageSize > 0) {
+    // Message received
+    Serial.print("Received message on topic: ");
+    Serial.println(mqttClient.messageTopic());
+    
+    Serial.print("Message size: ");
+    Serial.println(messageSize);
+    
+    // Read and print the message content
+    Serial.print("Message content: ");
+    String msg = "";
+    while (mqttClient.available()) {
+      msg += (char)mqttClient.read();
+
+    }
+    Serial.println(msg);
+    StaticJsonDocument<200> docmessage;
+    DeserializationError error = deserializeJson(docmessage, msg);
+    
+    if (error) {
+      Serial.print("deserializeJson() failed: ");
+      Serial.println(error.c_str());
+      return;
+    }
+
+    if (docmessage.containsKey("command") && docmessage.containsKey("msgID")) {
+      String command = docmessage["command"];
+      Serial.print("Received command: ");
+      Serial.println(command);
+
+      // Specific command handling
+      if (command == "getConfig"){
+        String configString = getConfigAsString();
+        Serial.println(configString);
+        String mqttMsg = "";
+        DynamicJsonDocument mqttdoc(512);
+        mqttdoc["msgID"] = docmessage["msgID"];
+        mqttdoc["command"] = "configSend";
+        mqttdoc["value"] = configString;
+        serializeJson(mqttdoc, mqttMsg);
+        Serial.println(mqttMsg);
+        publishMessage("RZ/config", mqttMsg);
+        Serial.println("Sent config to RZ/config");
+      }else if (command == "setConfig"){
+        String configString = docmessage["value"];
+        updateConfigFromJson(configString);
+        Serial.println("Updated config from MQTT message");
+        saveConfig();
+        Serial.println("Saved config to file system");
+      }else if (command == "addAccessId"){
+        Serial.println("Adding new access ID...");
+        if (addNewAccessId()) {
+          Serial.println("New access ID added successfully");
+        } else {
+          Serial.println("Failed to add new access ID");
+        }
+    }
+  }
+}
+}
+
 
 #pragma endregion
 

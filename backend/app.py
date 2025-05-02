@@ -359,7 +359,7 @@ if __name__ == '__main__':
     # Run the app
     mqtt_client.start(clients)
     #comment out mock sender if not debugging
-    start_mock_sender(clients)
+    #start_mock_sender(clients)
     print("MQTT client started and listening for messages")
     port = int(os.getenv('PORT', 5000))
     app.run(debug=True, host='0.0.0.0', port=port)
