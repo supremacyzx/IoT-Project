@@ -566,7 +566,9 @@ bool checkAccess(String id, bool armed) {
       accessSound(config.buzzerpin);
       DynamicJsonDocument mqttdoc(512);
       mqttdoc["type"] = "log";
-      mqttdoc["access_granted"] = String(id);
+      mqttdoc["source"] = "Access";
+      mqttdoc["status"] = "granted";
+      mqttdoc["ident"] = String(id);
       serializeJson(mqttdoc, mqttMsg);
       publishMessage("RZ/incidents", mqttMsg);
       Serial.println("Access Log sent: " + mqttMsg);
@@ -582,7 +584,9 @@ bool checkAccess(String id, bool armed) {
   denySound(config.buzzerpin);
   DynamicJsonDocument mqttdoc(512);
   mqttdoc["type"] = "log";
-  mqttdoc["access_denied"] = String(id);
+  mqttdoc["source"] = "Access";
+  mqttdoc["status"] = "denied";
+  mqttdoc["ident"] = String(id);
   serializeJson(mqttdoc, mqttMsg);
   publishMessage("RZ/incidents", mqttMsg);
   Serial.println("Access Log sent: " + mqttMsg);
