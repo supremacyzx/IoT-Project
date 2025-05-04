@@ -105,6 +105,27 @@ class MQTTClient:
             except Exception as e:
                 print("Error parsing config: ", e)
         elif msg.topic == MQTT_TOPIC_INCIDENTS:
+            try:
+        # Parse the JSON payload
+                payload = json.loads(msg.payload.decode('utf-8'))
+                alarm_type = payload.get("type", "unknown")
+                value_json = json.dumps(payload)
+                timestamp = datetime.now()
+                conn = sqlite3.connect(DATABASE)
+                cursor = conn.cursor()
+                cursor.execute('''
+                    INSERT INTO incidents (timestamp, type, value)
+                    VALUES (?, ?, ?)
+                ''', (timestamp, alarm_type, value_json))
+                conn.commit()
+                source = payload.get("source", "unknown")
+                status = payload.get("status", "unknown")
+                print(f"Incident recorded: {alarm_type} - {source} {status}")
+
+            except json.JSONDecodeError:
+               print(f"Failed to parse incident JSON: {msg.payload}")
+            except Exception as e:
+               print(f"Error processing incident: {str(e)}")    
             return None
         else:
             return None

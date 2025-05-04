@@ -320,22 +320,31 @@ def get_incidents():
         # Get query parameters for filtering
         start_date = request.args.get('start_date')
         end_date = request.args.get('end_date')
+        incident_type = request.args.get('type')
         limit = request.args.get('limit', 100)
         
         conn = get_db_connection()
-        query = 'SELECT timestamp, value FROM incidents'
+        query = 'SELECT id, timestamp, type, value FROM incidents'
         params = []
+        conditions = []
         
         # Add date filters if they exist
-        if start_date and end_date:
-            query += ' WHERE timestamp BETWEEN ? AND ?'
-            params.extend([start_date, end_date])
-        elif start_date:
-            query += ' WHERE timestamp >= ?'
+        if start_date:
+            conditions.append('timestamp >= ?')
             params.append(start_date)
-        elif end_date:
-            query += ' WHERE timestamp <= ?'
+        
+        if end_date:
+            conditions.append('timestamp <= ?')
             params.append(end_date)
+        
+        # Add type filter if it exists
+        if incident_type:
+            conditions.append('type = ?')
+            params.append(incident_type)
+        
+        # Combine conditions if any exist
+        if conditions:
+            query += ' WHERE ' + ' AND '.join(conditions)
         
         # Add ordering and limit
         query += ' ORDER BY timestamp DESC LIMIT ?'
@@ -349,21 +358,24 @@ def get_incidents():
             try:
                 value_dict = json.loads(row['value'])
                 incidents.append({
+                    'id': row['id'],
                     'timestamp': row['timestamp'],
-                    'data': value_dict
+                    'type': row['type'],
+                    'details': value_dict
                 })
             except json.JSONDecodeError:
                 # If the value isn't valid JSON, include it as a string
                 incidents.append({
+                    'id': row['id'],
                     'timestamp': row['timestamp'],
-                    'data': row['value']
+                    'type': row['type'],
+                    'details': row['value']
                 })
         
         conn.close()
         return jsonify({'incidents': incidents})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-
 
 
 

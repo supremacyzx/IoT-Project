@@ -35,9 +35,9 @@ String* access_ids;
 int num_access_ids = 0;
 SensorData lastSensorData;
 bool lastarmed;
-bool alarming = false;
-
-
+bool humidityAlarming = false;
+bool tempAlarming = false;
+bool alarmSilenced = false;
 
 // Configuration variables - will be loaded from LittleFS
 struct Config {
@@ -67,6 +67,12 @@ struct Config {
   int lcdAddress;
   int lcdCols;
   int lcdRows;
+
+  //Alarm Config
+  float tmpThreshold = 30.0; // Temperature threshold for alarm
+  float lfThreshold = 50.0; // Humidity threshold for alarm
+  bool isTmpSilent = false; // Flag for silent alarm
+  bool isLfSilent = false; // Flag for silent alarm
 };
 
 Config config;
@@ -116,7 +122,10 @@ bool loadConfig() {
     config.lcdCols = 16;
     config.lcdRows = 2;
     strcpy(config.mqttID, "Arduino--001");
-    
+    config.tmpThreshold = 30.0; // Temperature threshold for alarm
+    config.lfThreshold = 50.0; // Humidity threshold for alarm  
+    config.isTmpSilent = false; // Flag for silent alarm
+    config.isLfSilent = false; // Flag for silent alarm
     // Save default config
     saveConfig();
     return false;
@@ -156,6 +165,12 @@ bool loadConfig() {
   config.lcdAddress = doc["sensors"]["lcdAddress"] | 0x27;
   config.lcdCols = doc["sensors"]["lcdCols"] | 16;
   config.lcdRows = doc["sensors"]["lcdRows"] | 2;
+
+  //Alarm config
+  config.tmpThreshold = doc["alarm"]["tmpThreshold"] | 30.0; // Temperature threshold for alarm
+  config.lfThreshold = doc["alarm"]["lfThreshold"] | 50.0; // Humidity threshold for alarm
+  config.isTmpSilent = doc["alarm"]["isTmpSilent"] | false; // Flag for silent alarm  
+  config.isLfSilent = doc["alarm"]["isLfSilent"] | false; // Flag for silent alarm
   
   Serial.println("Config loaded successfully");
   return true;
@@ -200,6 +215,13 @@ bool saveConfig() {
   sensors["lcdCols"] = config.lcdCols;
   sensors["lcdRows"] = config.lcdRows;
   
+  //Alarm config
+  JsonObject sensors = doc.createNestedObject("alarm");
+  sensors["tmpThreshold"] = config.tmpThreshold;
+  sensors["lfThreshold"] = config.lfThreshold;
+  sensors["isTmpSilent"] = config.isTmpSilent;
+  sensors["isLfSilent"] = config.isLfSilent;
+
   // Serialize JSON to file
   if (serializeJson(doc, configFile) == 0) {
     Serial.println("Failed to write to config file");
@@ -264,6 +286,13 @@ String getConfigAsString() {
   sensors["lcdCols"] = config.lcdCols;
   sensors["lcdRows"] = config.lcdRows;
   
+  //Alarm config
+  JsonObject alarm = doc.createNestedObject("alarm"); 
+  alarm["tmpThreshold"] = config.tmpThreshold;
+  alarm["lfThreshold"] = config.lfThreshold;
+  alarm["isTmpSilent"] = config.isTmpSilent;
+  alarm["isLfSilent"] = config.isLfSilent;
+
   // Serialize JSON to file
   String configString;
   serializeJson(doc, configString);
@@ -317,6 +346,14 @@ void updateConfigFromJson(const String& jsonString) {
     if (sensors.containsKey("lcdAddress")) config.lcdAddress = sensors["lcdAddress"];
     if (sensors.containsKey("lcdCols")) config.lcdCols = sensors["lcdCols"];
     if (sensors.containsKey("lcdRows")) config.lcdRows = sensors["lcdRows"];
+  }
+
+  if (doc.containsKey("alarm")) {
+    JsonObject alarm = doc["alarm"];
+    if (alarm.containsKey("tmpThreshold")) config.tmpThreshold = alarm["tmpThreshold"];
+    if (alarm.containsKey("lfThreshold")) config.lfThreshold = alarm["lfThreshold"];
+    if (alarm.containsKey("isTmpSilent")) config.isTmpSilent = alarm["isTmpSilent"];
+    if (alarm.containsKey("isLfSilent")) config.isLfSilent = alarm["isLfSilent"];
   }
 }
 
@@ -527,6 +564,12 @@ bool checkAccess(String id, bool armed) {
       lcd->clear();
       lcd->print("Access granted");
       accessSound(config.buzzerpin);
+      DynamicJsonDocument mqttdoc(512);
+      mqttdoc["type"] = "log";
+      mqttdoc["access_granted"] = String(id);
+      serializeJson(mqttdoc, mqttMsg);
+      publishMessage("RZ/incidents", mqttMsg);
+      Serial.println("Access Log sent: " + mqttMsg);
       delay(1000);
       lcd->clear();
       Serial.println("Access granted");
@@ -537,6 +580,12 @@ bool checkAccess(String id, bool armed) {
   lcd->clear();
   lcd->print("Access denied");
   denySound(config.buzzerpin);
+  DynamicJsonDocument mqttdoc(512);
+  mqttdoc["type"] = "log";
+  mqttdoc["access_denied"] = String(id);
+  serializeJson(mqttdoc, mqttMsg);
+  publishMessage("RZ/incidents", mqttMsg);
+  Serial.println("Access Log sent: " + mqttMsg);
   delay(1000);
   lcd->clear();
   return false; // ID not found
@@ -760,6 +809,74 @@ void loop() {
   //Gather Sensor Data
   SensorData sensorData = readDHTSensor();
   
+  // Alarm Checking only when armed, so alarm can be disabled on disarm
+  if (sensorData.temperature > config.tmpThreshold) {
+    if (!tempAlarming) {
+      // Publish temperature alarm start message to MQTT
+      String mqttMsg = "";
+      DynamicJsonDocument mqttdoc(512);
+      mqttdoc["type"] = "alarm";
+      mqttdoc["status"] = "start";
+      mqttdoc["source"] = "temperature";
+      mqttdoc["tmp"] = String(sensorData.temperature);
+      serializeJson(mqttdoc, mqttMsg);
+      publishMessage("RZ/incidents", mqttMsg);
+      Serial.println("Temperature alarm triggered: " + mqttMsg);
+      tempAlarming = true;
+    }
+    
+    // Play sound continuously if armed, not silent, and not manually silenced
+    if (armed && !config.isTmpSilent && !alarmSilenced) {
+      alarmSound(config.buzzerpin);
+    }
+  } else if (tempAlarming) {
+    // Temperature back to normal - send end message
+    String mqttMsg = "";
+    DynamicJsonDocument mqttdoc(512);
+    mqttdoc["type"] = "alarm";
+    mqttdoc["status"] = "end";
+    mqttdoc["source"] = "temperature";
+    mqttdoc["tmp"] = String(sensorData.temperature);
+    serializeJson(mqttdoc, mqttMsg);
+    publishMessage("RZ/incidents", mqttMsg);
+    Serial.println("Temperature alarm ended: " + mqttMsg);
+    tempAlarming = false;
+  }
+  
+  // Humidity alarm check
+  if (sensorData.humidity > config.lfThreshold) {
+    if (!humidityAlarming) {
+      // Publish humidity alarm start message to MQTT
+      String mqttMsg = "";
+      DynamicJsonDocument mqttdoc(512);
+      mqttdoc["type"] = "alarm";
+      mqttdoc["status"] = "start";
+      mqttdoc["source"] = "humidity";
+      mqttdoc["lf"] = String(sensorData.humidity);
+      serializeJson(mqttdoc, mqttMsg);
+      publishMessage("RZ/incidents", mqttMsg);
+      Serial.println("Humidity alarm triggered: " + mqttMsg);
+      humidityAlarming = true;
+    }
+    
+    // Play sound continuously if armed, not silent, and not manually silenced
+    if (armed && !config.isLfSilent && !alarmSilenced) {
+      alarmSound(config.buzzerpin);
+    }
+  } else if (humidityAlarming) {
+    // Humidity back to normal - send end message
+    String mqttMsg = "";
+    DynamicJsonDocument mqttdoc(512);
+    mqttdoc["type"] = "alarm";
+    mqttdoc["status"] = "end";
+    mqttdoc["source"] = "humidity";
+    mqttdoc["lf"] = String(sensorData.humidity);
+    serializeJson(mqttdoc, mqttMsg);
+    publishMessage("RZ/incidents", mqttMsg);
+    Serial.println("Humidity alarm ended: " + mqttMsg);
+    humidityAlarming = false;
+  }
+ 
   
 
   // Publish Sensor Data to MQTT only if data has changed 
@@ -777,9 +894,10 @@ void loop() {
       lcd->print("LF: " + String(sensorData.humidity) + "%");
 
     }
-  if (alarming){
-    alarmSound(config.buzzerpin);
-  }
+
+
+    
+  
   
   //reset / set last data 
   lastSensorData = sensorData;
