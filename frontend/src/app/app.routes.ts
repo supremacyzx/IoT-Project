@@ -8,6 +8,7 @@ import { AirqualityComponent } from './pages/sensory/airquality/airquality.compo
 import { AuthComponent } from './pages/auth/auth.component';
 import { AuthGuard } from './guards/auth.guard';
 import { LoggedInGuard } from './guards/logged-in.guard';
+import {ConfigComponent} from './pages/settings/config/config.component';
 
 
 export const routes: Routes = [
@@ -50,8 +51,12 @@ export const routes: Routes = [
     children: [
       {
         path: '',
-        redirectTo: 'system',
+        redirectTo: 'config',
         pathMatch: 'full'
+      },
+      {
+        path: 'config',
+        component: ConfigComponent
       },
       {
         path: 'appearance',
