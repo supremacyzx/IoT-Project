@@ -216,7 +216,7 @@ bool saveConfig() {
   sensors["lcdRows"] = config.lcdRows;
   
   //Alarm config
-  JsonObject sensors = doc.createNestedObject("alarm");
+  JsonObject alarm = doc.createNestedObject("alarm");
   sensors["tmpThreshold"] = config.tmpThreshold;
   sensors["lfThreshold"] = config.lfThreshold;
   sensors["isTmpSilent"] = config.isTmpSilent;
@@ -526,8 +526,10 @@ void denySound(int buzzerPin) {
 
 // Function for Alarm-Sound
 void alarmSound(int buzzerPin) {
-    tone(buzzerPin, 1000, 300);  // 1000Mhz for 300 ms
-    tone(buzzerPin, 300, 300); // 300Mhz for 300ms
+    tone(buzzerPin, 1000, 100);  // 1000Mhz for 300 ms
+    delay(100);
+    tone(buzzerPin, 300, 100); // 300Mhz for 300ms
+    delay(100);
   }
 
 
@@ -565,6 +567,7 @@ bool checkAccess(String id, bool armed) {
       lcd->print("Access granted");
       accessSound(config.buzzerpin);
       DynamicJsonDocument mqttdoc(512);
+      String mqttMsg = "";
       mqttdoc["type"] = "log";
       mqttdoc["source"] = "Access";
       mqttdoc["status"] = "granted";
@@ -582,6 +585,7 @@ bool checkAccess(String id, bool armed) {
   lcd->clear();
   lcd->print("Access denied");
   denySound(config.buzzerpin);
+  String mqttMsg = "";
   DynamicJsonDocument mqttdoc(512);
   mqttdoc["type"] = "log";
   mqttdoc["source"] = "Access";
@@ -813,7 +817,6 @@ void loop() {
   //Gather Sensor Data
   SensorData sensorData = readDHTSensor();
   
-  // Alarm Checking only when armed, so alarm can be disabled on disarm
   if (sensorData.temperature > config.tmpThreshold) {
     if (!tempAlarming) {
       // Publish temperature alarm start message to MQTT
@@ -831,9 +834,10 @@ void loop() {
     
     // Play sound continuously if armed, not silent, and not manually silenced
     if (armed && !config.isTmpSilent && !alarmSilenced) {
+      Serial.println(String(armed) + " " +  String(config.isTmpSilent));
       alarmSound(config.buzzerpin);
     }
-  } else if (tempAlarming) {
+  } else if (tempAlarming && sensorData.temperature < config.tmpThreshold) {
     // Temperature back to normal - send end message
     String mqttMsg = "";
     DynamicJsonDocument mqttdoc(512);
@@ -865,9 +869,10 @@ void loop() {
     
     // Play sound continuously if armed, not silent, and not manually silenced
     if (armed && !config.isLfSilent && !alarmSilenced) {
+      Serial.println(String(armed) + " " + String(config.isLfSilent));
       alarmSound(config.buzzerpin);
     }
-  } else if (humidityAlarming) {
+  } else if (humidityAlarming && sensorData.humidity < config.lfThreshold) {
     // Humidity back to normal - send end message
     String mqttMsg = "";
     DynamicJsonDocument mqttdoc(512);
@@ -936,6 +941,7 @@ void loop() {
   bool accessGranted = checkAccess(cardID, armed);
   if (accessGranted) {
     armed = !armed;
+    Serial.println("Switched armed status to: " + String(armed));
   }
   lcd->clear();
   lcd->setCursor(0, 0);

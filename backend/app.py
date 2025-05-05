@@ -215,6 +215,9 @@ def get_config():
             if mqtt_client.configData:
                 print(mqtt_client.configData)
                 if mqtt_client.configData["msgID"] == msgID:
+                    configJson = mqtt_client.configData
+                    configJson["value"] = json.loads(configJson["value"])
+                    print(configJson)
                     return mqtt_client.configData
             attempts += 1
             time.sleep(0.5)
