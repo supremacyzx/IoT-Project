@@ -69,7 +69,6 @@ class MQTTClient:
                 if data != self.lastData:
                     self._insert_into_db(data) #only insert if data is different
                     print(f"Received data: {data}")
-
                 if "tmp" in data:
                     self.latest_data["tmp"] = data["tmp"]
                     data_updated = True
@@ -108,6 +107,14 @@ class MQTTClient:
             try:
         # Parse the JSON payload
                 payload = json.loads(msg.payload.decode('utf-8'))
+                try:
+                    for ws in self.clients[:]:
+                        try:
+                            ws.send(payload)
+                        except:
+                            self.clients.remove(ws)
+                except Exception as e:
+                    print(f"Error sending message to clients: {e}")
                 alarm_type = payload.get("type", "unknown")
                 value_json = json.dumps(payload)
                 timestamp = datetime.now()

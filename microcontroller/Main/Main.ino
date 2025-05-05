@@ -526,10 +526,10 @@ void denySound(int buzzerPin) {
 
 // Function for Alarm-Sound
 void alarmSound(int buzzerPin) {
-    tone(buzzerPin, 1000, 100);  // 1000Mhz for 300 ms
-    delay(100);
-    tone(buzzerPin, 300, 100); // 300Mhz for 300ms
-    delay(100);
+    tone(buzzerPin, 1000, 200);  // 1000Mhz for 300 ms
+    delay(200);
+    tone(buzzerPin, 300, 200); // 300Mhz for 300ms
+    delay(200);
   }
 
 
