@@ -1,12 +1,311 @@
-<div class="appearance-container p-6">
-  <div class="flex justify-between items-start mb-6">
-    <div>
-      <h1 class="font-bold mb-2" style="font-size: var(--font-size-lg);">Config</h1>
-      <p style="color: var(--color-text-muted); font-size: var(--font-size-md);">
-        Change how the Backend is configured.
-      </p>
+<div class="max-w-full mx-4 h-full overflow-hidden">
+  <div class="space-y-6 flex flex-col h-full">
+    <!-- Header mit Titel und Speichern-Button -->
+    <div class="flex justify-between items-center sticky top-0 z-20 py-3" style="background-color: var(--color-background); border-bottom: var(--border-width) var(--border-style) var(--color-border);">
+      <div>
+        <h1 class="text-2xl font-bold" style="color: var(--color-text);">Konfiguration</h1>
+        <p style="color: var(--color-text-muted); font-size: var(--font-size-md);">
+          Ändern Sie die Einstellungen des Backend-Systems
+        </p>
+      </div>
+      <!-- Speichern-Button im Header -->
+      <button *ngIf="config && !isLoading" (click)="saveConfig()" class="py-2 px-6 rounded-md flex items-center hover:bg-opacity-90"
+              style="background-color: var(--color-success); color: var(--color-background-secondary);">
+        <i-lucide [name]="icons.Save" [size]="18" [strokeWidth]="2" class="mr-2"></i-lucide>
+        Änderungen speichern
+      </button>
+    </div>
+
+    <!-- Fehlermeldung -->
+    <div class="rounded-lg p-4 mb-6 flex items-start" *ngIf="errorMessage"
+         style="background-color: var(--color-background-secondary); border: var(--border-width) var(--border-style) var(--color-border); border-left-width: 4px; border-left-color: var(--color-error);">
+      <i-lucide [name]="icons.AlertCircle" [size]="24" [strokeWidth]="2" class="mr-3 flex-shrink-0" style="color: var(--color-error);"></i-lucide>
+      <div>
+        <h3 class="font-medium mb-1" style="color: var(--color-error);">Fehler</h3>
+        <p style="color: var(--color-text);">{{ errorMessage }}</p>
+      </div>
+    </div>
+
+    <!-- Erfolgsmeldung -->
+    <div class="rounded-lg p-4 mb-6 flex items-start" *ngIf="successMessage"
+         style="background-color: var(--color-background-secondary); border: var(--border-width) var(--border-style) var(--color-border); border-left-width: 4px; border-left-color: var(--color-success);">
+      <i-lucide [name]="icons.CheckCircle" [size]="24" [strokeWidth]="2" class="mr-3 flex-shrink-0" style="color: var(--color-success);"></i-lucide>
+      <div>
+        <h3 class="font-medium mb-1" style="color: var(--color-success);">Erfolg</h3>
+        <p style="color: var(--color-text);">{{ successMessage }}</p>
+      </div>
+    </div>
+
+    <!-- Skeleton-Loading für Konfiguration -->
+    <div *ngIf="isLoading" class="flex-1 overflow-y-auto">
+      <!-- Alarm Settings Skeleton -->
+      <div class="rounded-lg shadow-md p-6 mb-6"
+           style="background-color: var(--color-background-secondary); border: var(--border-width) var(--border-style) var(--color-border);">
+        <h2 class="text-xl font-bold mb-4 flex items-center" style="color: var(--color-text);">
+          <div class="w-5 h-5 mr-2 rounded animate-pulse" style="background-color: var(--color-border);"></div>
+          <div class="h-5 w-32 rounded animate-pulse" style="background-color: var(--color-border);"></div>
+        </h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="mb-4" *ngFor="let i of [1,2,3,4]">
+            <div class="h-5 w-40 mb-2 rounded animate-pulse" style="background-color: var(--color-border);"></div>
+            <div class="h-10 w-full rounded animate-pulse" style="background-color: var(--color-border);"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MQTT Settings Skeleton -->
+      <div class="rounded-lg shadow-md p-6 mb-6"
+           style="background-color: var(--color-background-secondary); border: var(--border-width) var(--border-style) var(--color-border);">
+        <h2 class="text-xl font-bold mb-4 flex items-center" style="color: var(--color-text);">
+          <div class="w-5 h-5 mr-2 rounded animate-pulse" style="background-color: var(--color-border);"></div>
+          <div class="h-5 w-40 rounded animate-pulse" style="background-color: var(--color-border);"></div>
+        </h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="mb-4" *ngFor="let i of [1,2,3,4,5]">
+            <div class="h-5 w-36 mb-2 rounded animate-pulse" style="background-color: var(--color-border);"></div>
+            <div class="h-10 w-full rounded animate-pulse" style="background-color: var(--color-border);"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Weitere Skeletons für andere Bereiche -->
+      <div *ngFor="let i of [1,2]" class="rounded-lg shadow-md p-6 mb-6"
+           style="background-color: var(--color-background-secondary); border: var(--border-width) var(--border-style) var(--color-border);">
+        <h2 class="text-xl font-bold mb-4 flex items-center" style="color: var(--color-text);">
+          <div class="w-5 h-5 mr-2 rounded animate-pulse" style="background-color: var(--color-border);"></div>
+          <div class="h-5 w-36 rounded animate-pulse" style="background-color: var(--color-border);"></div>
+        </h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="mb-4" *ngFor="let j of [1,2,3,4,5,6]">
+            <div class="h-5 w-32 mb-2 rounded animate-pulse" style="background-color: var(--color-border);"></div>
+            <div class="h-10 w-full rounded animate-pulse" style="background-color: var(--color-border);"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="config && !isLoading" class="flex-1 overflow-y-auto">
+      <!-- Alarm Settings -->
+      <div class="rounded-lg shadow-md p-6 mb-6"
+           style="background-color: var(--color-background-secondary); border: var(--border-width) var(--border-style) var(--color-border);">
+        <h2 class="text-xl font-bold mb-4 flex items-center" style="color: var(--color-text);">
+          <i-lucide [name]="icons.Bell" [size]="20" [strokeWidth]="2" class="mr-2" style="color: var(--color-primary);"></i-lucide>
+          Alarm-Einstellungen
+        </h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="mb-4">
+            <label class="block mb-2" style="color: var(--color-text-secondary);">LF Schwellenwert</label>
+            <input type="number" [(ngModel)]="config.value.alarm.lfThreshold"
+                  class="w-full p-2 rounded-md" style="border: var(--border-width) var(--border-style) var(--color-border); background-color: var(--color-background); color: var(--color-text);" />
+          </div>
+
+          <div class="mb-4">
+            <label class="block mb-2" style="color: var(--color-text-secondary);">Temperatur Schwellenwert</label>
+            <input type="number" [(ngModel)]="config.value.alarm.tmpThreshold"
+                  class="w-full p-2 rounded-md" style="border: var(--border-width) var(--border-style) var(--color-border); background-color: var(--color-background); color: var(--color-text);" />
+          </div>
+
+          <div class="mb-4">
+            <label class="flex items-center" style="color: var(--color-text);">
+              <input type="checkbox" [(ngModel)]="config.value.alarm.isLfSilent"
+                    class="mr-2" />
+              <span>LF Alarm stumm</span>
+            </label>
+          </div>
+
+          <div class="mb-4">
+            <label class="flex items-center" style="color: var(--color-text);">
+              <input type="checkbox" [(ngModel)]="config.value.alarm.isTmpSilent"
+                    class="mr-2" />
+              <span>Temperatur Alarm stumm</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- WiFi Settings - Neu positioniert und überarbeitetes Layout -->
+      <div class="rounded-lg shadow-md p-6 mb-6"
+           style="background-color: var(--color-background-secondary); border: var(--border-width) var(--border-style) var(--color-border);">
+        <h2 class="text-xl font-bold mb-4 flex items-center" style="color: var(--color-text);">
+          <i-lucide [name]="icons.Wifi" [size]="20" [strokeWidth]="2" class="mr-2" style="color: var(--color-primary);"></i-lucide>
+          WLAN-Einstellungen
+        </h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+          <div class="mb-4">
+            <label class="block mb-2 font-medium" style="color: var(--color-text-secondary);">WLAN-Netzwerk (SSID)</label>
+            <div class="relative">
+              <i-lucide [name]="icons.Wifi" [size]="18" [strokeWidth]="2" class="absolute left-3 top-1/2 transform -translate-y-1/2"
+                       style="color: var(--color-text-muted);"></i-lucide>
+              <input type="text" [(ngModel)]="config.value.wifi.ssid"
+                    class="w-full p-2 pl-10 rounded-md" style="border: var(--border-width) var(--border-style) var(--color-border); background-color: var(--color-background); color: var(--color-text);"
+                    placeholder="Netzwerkname eingeben" />
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label class="block mb-2 font-medium" style="color: var(--color-text-secondary);">WLAN-Passwort</label>
+            <div class="relative flex">
+              <div class="relative flex-grow">
+                <input [type]="showWifiPassword ? 'text' : 'password'" [(ngModel)]="wifiPassword"
+                      class="w-full p-2 rounded-l-md" style="border: var(--border-width) var(--border-style) var(--color-border); background-color: var(--color-background); color: var(--color-text);"
+                      placeholder="Passwort eingeben" />
+              </div>
+              <button type="button" (click)="toggleWifiPassword()"
+                     class="p-2 min-w-[100px] rounded-r-md" style="background-color: var(--color-background-tertiary); color: var(--color-text); border: var(--border-width) var(--border-style) var(--color-border); border-left: none;">
+                {{ showWifiPassword ? 'Verbergen' : 'Anzeigen' }}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="mb-4 mt-4">
+          <label class="inline-flex items-center p-3 rounded-md" style="background-color: var(--color-background-tertiary);">
+            <input type="checkbox" [(ngModel)]="config.value.wifi.enabled"
+                  class="mr-2 h-5 w-5" />
+            <span style="color: var(--color-text); font-weight: 500;">WLAN-Verbindung aktivieren</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- MQTT Settings -->
+      <div class="rounded-lg shadow-md p-6 mb-6"
+           style="background-color: var(--color-background-secondary); border: var(--border-width) var(--border-style) var(--color-border);">
+        <h2 class="text-xl font-bold mb-4 flex items-center" style="color: var(--color-text);">
+          <i-lucide [name]="icons.Server" [size]="20" [strokeWidth]="2" class="mr-2" style="color: var(--color-primary);"></i-lucide>
+          MQTT-Einstellungen
+        </h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="mb-4">
+            <label class="block mb-2" style="color: var(--color-text-secondary);">Broker</label>
+            <input type="text" [(ngModel)]="config.value.mqtt.broker"
+                  class="w-full p-2 rounded-md" style="border: var(--border-width) var(--border-style) var(--color-border); background-color: var(--color-background); color: var(--color-text);" />
+          </div>
+
+          <div class="mb-4">
+            <label class="block mb-2" style="color: var(--color-text-secondary);">Port</label>
+            <input type="number" [(ngModel)]="config.value.mqtt.port"
+                  class="w-full p-2 rounded-md" style="border: var(--border-width) var(--border-style) var(--color-border); background-color: var(--color-background); color: var(--color-text);" />
+          </div>
+
+          <div class="mb-4">
+            <label class="block mb-2" style="color: var(--color-text-secondary);">MQTT ID</label>
+            <input type="text" [(ngModel)]="config.value.mqtt.mqttID"
+                  class="w-full p-2 rounded-md" style="border: var(--border-width) var(--border-style) var(--color-border); background-color: var(--color-background); color: var(--color-text);" />
+          </div>
+
+          <div class="mb-4">
+            <label class="block mb-2" style="color: var(--color-text-secondary);">MQTT Benutzer</label>
+            <input type="text" [(ngModel)]="config.value.mqtt.mqttUser"
+                  class="w-full p-2 rounded-md" style="border: var(--border-width) var(--border-style) var(--color-border); background-color: var(--color-background); color: var(--color-text);" />
+          </div>
+
+          <div class="mb-4">
+            <label class="block mb-2" style="color: var(--color-text-secondary);">MQTT Passwort</label>
+            <div class="flex">
+              <input [type]="showMqttPassword ? 'text' : 'password'" [(ngModel)]="mqttPassword"
+                    class="w-full p-2 rounded-l-md" style="border: var(--border-width) var(--border-style) var(--color-border); background-color: var(--color-background); color: var(--color-text);" />
+              <button type="button" (click)="toggleMqttPassword()"
+                     class="p-2 rounded-r-md" style="background-color: var(--color-background-tertiary); color: var(--color-text); border: var(--border-width) var(--border-style) var(--color-border); border-left: none;">
+                {{ showMqttPassword ? 'Verbergen' : 'Anzeigen' }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pin Settings -->
+      <div class="rounded-lg shadow-md p-6 mb-6"
+           style="background-color: var(--color-background-secondary); border: var(--border-width) var(--border-style) var(--color-border);">
+        <h2 class="text-xl font-bold mb-4 flex items-center" style="color: var(--color-text);">
+          <i-lucide [name]="icons.Cpu" [size]="20" [strokeWidth]="2" class="mr-2" style="color: var(--color-primary);"></i-lucide>
+          Pin-Konfiguration
+        </h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="mb-4">
+            <label class="block mb-2" style="color: var(--color-text-secondary);">Buzzer-Pin</label>
+            <input type="number" [(ngModel)]="config.value.pins.buzzerpin"
+                  class="w-full p-2 rounded-md" style="border: var(--border-width) var(--border-style) var(--color-border); background-color: var(--color-background); color: var(--color-text);" />
+          </div>
+
+          <div class="mb-4">
+            <label class="block mb-2" style="color: var(--color-text-secondary);">DHT-Pin</label>
+            <input type="number" [(ngModel)]="config.value.pins.dht"
+                  class="w-full p-2 rounded-md" style="border: var(--border-width) var(--border-style) var(--color-border); background-color: var(--color-background); color: var(--color-text);" />
+          </div>
+
+          <div class="mb-4">
+            <label class="block mb-2" style="color: var(--color-text-secondary);">LED Grün</label>
+            <input type="number" [(ngModel)]="config.value.pins.ledGreen"
+                  class="w-full p-2 rounded-md" style="border: var(--border-width) var(--border-style) var(--color-border); background-color: var(--color-background); color: var(--color-text);" />
+          </div>
+
+          <div class="mb-4">
+            <label class="block mb-2" style="color: var(--color-text-secondary);">LED Rot</label>
+            <input type="number" [(ngModel)]="config.value.pins.ledRed"
+                  class="w-full p-2 rounded-md" style="border: var(--border-width) var(--border-style) var(--color-border); background-color: var(--color-background); color: var(--color-text);" />
+          </div>
+
+          <div class="mb-4">
+            <label class="block mb-2" style="color: var(--color-text-secondary);">RFID SS</label>
+            <input type="number" [(ngModel)]="config.value.pins.rfidSS"
+                  class="w-full p-2 rounded-md" style="border: var(--border-width) var(--border-style) var(--color-border); background-color: var(--color-background); color: var(--color-text);" />
+          </div>
+
+          <div class="mb-4">
+            <label class="block mb-2" style="color: var(--color-text-secondary);">SCL</label>
+            <input type="number" [(ngModel)]="config.value.pins.scl"
+                  class="w-full p-2 rounded-md" style="border: var(--border-width) var(--border-style) var(--color-border); background-color: var(--color-background); color: var(--color-text);" />
+          </div>
+
+          <div class="mb-4">
+            <label class="block mb-2" style="color: var(--color-text-secondary);">SDA</label>
+            <input type="number" [(ngModel)]="config.value.pins.sda"
+                  class="w-full p-2 rounded-md" style="border: var(--border-width) var(--border-style) var(--color-border); background-color: var(--color-background); color: var(--color-text);" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Sensor Settings -->
+      <div class="rounded-lg shadow-md p-6 mb-6"
+           style="background-color: var(--color-background-secondary); border: var(--border-width) var(--border-style) var(--color-border);">
+        <h2 class="text-xl font-bold mb-4 flex items-center" style="color: var(--color-text);">
+          <i-lucide [name]="icons.Gauge" [size]="20" [strokeWidth]="2" class="mr-2" style="color: var(--color-primary);"></i-lucide>
+          Sensor-Einstellungen
+        </h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="mb-4">
+            <label class="block mb-2" style="color: var(--color-text-secondary);">DHT Typ</label>
+            <input type="number" [(ngModel)]="config.value.sensors.dhtType"
+                  class="w-full p-2 rounded-md" style="border: var(--border-width) var(--border-style) var(--color-border); background-color: var(--color-background); color: var(--color-text);" />
+          </div>
+
+          <div class="mb-4">
+            <label class="block mb-2" style="color: var(--color-text-secondary);">LCD Adresse</label>
+            <input type="number" [(ngModel)]="config.value.sensors.lcdAddress"
+                  class="w-full p-2 rounded-md" style="border: var(--border-width) var(--border-style) var(--color-border); background-color: var(--color-background); color: var(--color-text);" />
+          </div>
+
+          <div class="mb-4">
+            <label class="block mb-2" style="color: var(--color-text-secondary);">LCD Spalten</label>
+            <input type="number" [(ngModel)]="config.value.sensors.lcdCols"
+                  class="w-full p-2 rounded-md" style="border: var(--border-width) var(--border-style) var(--color-border); background-color: var(--color-background); color: var(--color-text);" />
+          </div>
+
+          <div class="mb-4">
+            <label class="block mb-2" style="color: var(--color-text-secondary);">LCD Zeilen</label>
+            <input type="number" [(ngModel)]="config.value.sensors.lcdRows"
+                  class="w-full p-2 rounded-md" style="border: var(--border-width) var(--border-style) var(--color-border); background-color: var(--color-background); color: var(--color-text);" />
+          </div>
+        </div>
+      </div>
     </div>
   </div>
-
-
 </div>

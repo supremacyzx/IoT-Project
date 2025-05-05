@@ -82,6 +82,7 @@ html, body {
   --color-border-hover: #b8c2cc;
   --border-radius: 8px;
   --border-width: 1px;
+  --border-width-button: 2px;
   --border-style: solid;
 
   --shadow-sm: 0px 2px 4px rgba(0, 0, 0, 0.05);
@@ -347,9 +348,10 @@ button {
   font-weight: 500;
   cursor: pointer;
   transition: background-color var(--transition-fast),
-  border-color var(--transition-fast),
-  color var(--transition-fast),
-  box-shadow var(--transition-fast);
+    border-color var(--transition-fast),
+    color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast);
 }
 
 button:hover {
@@ -448,14 +450,14 @@ input[type="checkbox"] {
   -webkit-appearance: none;
   width: 1rem;
   height: 1rem;
-  border: var(--border-width) var(--border-style) var(--color-border);
+  border: var(--border-width-button) var(--border-style) var(--color-border);
   border-radius: calc(var(--border-radius) / 2);
   background: transparent;
   position: relative;
   cursor: pointer;
   vertical-align: middle;
   transition: background-color var(--transition-fast),
-  border-color var(--transition-fast);
+    border-color var(--transition-fast);
 }
 
 input[type="checkbox"]:hover {
@@ -514,10 +516,46 @@ input[type="checkbox"]:disabled {
   height: 1.25rem;
 }
 
-.toggle-switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
+/* Toggle switch styles für das Config-Formular */
+.peer:checked ~ span.absolute.bg-white {
+  background-color: var(--color-primary);
+}
+
+.peer:checked ~ span.absolute.bg-gray-400 {
+  background-color: rgba(var(--color-primary-rgb), 0.2);
+}
+
+span.absolute.rounded-full.bg-gray-400 {
+  background-color: var(--color-border);
+  opacity: 0.3;
+}
+
+/* Definieren der primary Farben für den Toggle Switch */
+.bg-primary-500 {
+  background-color: var(--color-primary);
+}
+
+.bg-primary-100 {
+  background-color: rgba(var(--color-primary-rgb), 0.2);
+}
+
+.dark .bg-primary-900 {
+  background-color: rgba(var(--color-primary-rgb), 0.3);
+}
+
+/* Fix für die Variable CSS-Farben in den Toggles */
+input[type="checkbox"].sr-only.peer:checked ~ span.absolute.inset-0 {
+  background-color: rgba(var(--color-primary-rgb), 0.2);
+}
+
+input[type="checkbox"].sr-only.peer:checked ~ span.absolute.h-4.w-4 {
+  background-color: var(--color-primary);
+}
+
+/* Styling für sticky header mit Save-Button */
+.sticky.top-0.z-20 {
+  padding-bottom: 1rem;
+  backdrop-filter: blur(8px);
 }
 
 /* Router Animation Styles */
@@ -542,4 +580,3 @@ router-outlet {
 .fade-in {
   animation: fadeIn var(--transition-medium) ease-in-out;
 }
-
