@@ -1,0 +1,203 @@
+<!-- Container mit reduzierter Margin -->
+<div class="max-w-full mx-4 h-full overflow-hidden">
+  <div class="space-y-6 flex flex-col h-full">
+    <!-- Header mit Titel und Filteroptionen - sticky -->
+    <div class="flex justify-between items-center sticky top-0 z-20 py-3" style="background-color: var(--color-background); border-bottom: var(--border-width) var(--border-style) var(--color-border);">
+      <div>
+        <h1 class="text-2xl font-bold" style="color: var(--color-text);">Vorfälle</h1>
+        <p style="color: var(--color-text-muted); font-size: var(--font-size-md);">
+          Übersicht der Vorfälle und Alarme
+        </p>
+      </div>
+
+      <div class="flex items-center gap-4">
+        <!-- Filter für Eintragstyp -->
+        <div class="flex items-center rounded-md" style="background-color: var(--color-background-secondary); border: var(--border-width) var(--border-style) var(--color-border);">
+          <button
+            (click)="filterByType('all')"
+            class="px-3 py-1.5 text-sm font-medium rounded-md"
+            [style]="selectedTypeFilter === 'all' ?
+              'background-color: transparent; color: var(--color-primary); border: 1px solid transparent;' :
+              'background-color: transparent; color: var(--color-text); border: 1px solid transparent;'"
+          >
+            Alle
+          </button>
+          <button
+            (click)="filterByType('log')"
+            class="px-3 py-1.5 text-sm font-medium rounded-md"
+            [style]="selectedTypeFilter === 'log' ?
+              'background-color: transparent; color: var(--color-primary); border: 1px solid transparent;' :
+              'background-color: transparent; color: var(--color-text); border: 1px solid transparent;'"
+          >
+            Logs
+          </button>
+          <button
+            (click)="filterByType('alarm')"
+            class="px-3 py-1.5 text-sm font-medium rounded-md"
+            [style]="selectedTypeFilter === 'alarm' ?
+              'background-color: transparent; color: var(--color-primary); border: 1px solid transparent;' :
+              'background-color: transparent; color: var(--color-text); border: 1px solid transparent;'"
+          >
+            Alarme
+          </button>
+        </div>
+
+        <!-- Filter für Quellen -->
+        <div class="flex items-center rounded-md" style="background-color: var(--color-background-secondary); border: var(--border-width) var(--border-style) var(--color-border);">
+          <button
+            (click)="filterBySource('all')"
+            class="px-3 py-1.5 text-sm font-medium rounded-md"
+            [style]="selectedSourceFilter === 'all' ?
+              'background-color: transparent; color: var(--color-primary); border: 1px solid transparent;' :
+              'background-color: transparent; color: var(--color-text); border: 1px solid transparent;'"
+          >
+            Alle Quellen
+          </button>
+          <button
+            (click)="filterBySource('Access')"
+            class="px-3 py-1.5 text-sm font-medium rounded-md"
+            [style]="selectedSourceFilter === 'Access' ?
+              'background-color: transparent; color: var(--color-primary); border: 1px solid transparent;' :
+              'background-color: transparent; color: var(--color-text); border: 1px solid transparent;'"
+          >
+            Zugang
+          </button>
+          <button
+            (click)="filterBySource('temperature')"
+            class="px-3 py-1.5 text-sm font-medium rounded-md"
+            [style]="selectedSourceFilter === 'temperature' ?
+              'background-color: transparent; color: var(--color-primary); border: 1px solid transparent;' :
+              'background-color: transparent; color: var(--color-text); border: 1px solid transparent;'"
+          >
+            Temperatur
+          </button>
+          <button
+            (click)="filterBySource('humidity')"
+            class="px-3 py-1.5 text-sm font-medium rounded-md"
+            [style]="selectedSourceFilter === 'humidity' ?
+              'background-color: transparent; color: var(--color-primary); border: 1px solid transparent;' :
+              'background-color: transparent; color: var(--color-text); border: 1px solid transparent;'"
+          >
+            Luftfeuchtigkeit
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fehleranzeige -->
+    <div *ngIf="error" class="text-center mt-4">
+      <p style="color: var(--color-error);">{{ error }}</p>
+    </div>
+
+    <!-- Tabellenansicht mit Skeleton-Loading -->
+    <div class="flex-1 overflow-hidden rounded-lg shadow-md p-4" style="border: var(--border-width) var(--border-style) var(--color-border);">
+      <!-- Tabellen-Container mit Overflow -->
+      <div class="overflow-y-container h-full">
+        <table class="min-w-full w-full table-fixed" style="border-collapse: separate; border-spacing: 0; table-layout: fixed;">
+          <colgroup>
+            <col style="width: 18%"> <!-- Zeitpunkt -->
+            <col style="width: 12%"> <!-- Typ -->
+            <col style="width: 20%"> <!-- Quelle -->
+            <col style="width: 15%"> <!-- Status -->
+            <col style="width: 35%"> <!-- Details -->
+          </colgroup>
+          <thead class="sticky top-0 z-10" style="background-color: var(--color-background-secondary);">
+          <tr>
+            <th scope="col" class="py-3 px-6 text-left font-medium" style="color: var(--color-text-secondary); border-bottom: var(--border-width) var(--border-style) var(--color-border);">
+              <div class="flex items-center">
+                <i-lucide [name]="icons.Clock" [size]="16" [strokeWidth]="2" class="mr-2" style="color: rgba(235,172,54,1);"></i-lucide>
+                <span class="uppercase text-xs">Zeitpunkt</span>
+              </div>
+            </th>
+            <th scope="col" class="py-3 px-6 text-left font-medium" style="color: var(--color-text-secondary); border-bottom: var(--border-width) var(--border-style) var(--color-border);">
+              <div class="flex items-center">
+                <i-lucide [name]="icons.Tag" [size]="16" [strokeWidth]="2" class="mr-2" style="color: rgba(54, 162, 235, 1);"></i-lucide>
+                <span class="uppercase text-xs">Typ</span>
+              </div>
+            </th>
+            <th scope="col" class="py-3 px-6 text-left font-medium" style="color: var(--color-text-secondary); border-bottom: var(--border-width) var(--border-style) var(--color-border);">
+              <div class="flex items-center">
+                <i-lucide [name]="icons.Database" [size]="16" [strokeWidth]="2" class="mr-2" style="color: rgba(153, 102, 255, 1);"></i-lucide>
+                <span class="uppercase text-xs">Quelle</span>
+              </div>
+            </th>
+            <th scope="col" class="py-3 px-6 text-left font-medium" style="color: var(--color-text-secondary); border-bottom: var(--border-width) var(--border-style) var(--color-border);">
+              <div class="flex items-center">
+                <i-lucide [name]="icons.BarChart" [size]="16" [strokeWidth]="2" class="mr-2" style="color: rgba(75, 192, 192, 1);"></i-lucide>
+                <span class="uppercase text-xs">Status</span>
+              </div>
+            </th>
+            <th scope="col" class="py-3 px-6 text-left font-medium" style="color: var(--color-text-secondary); border-bottom: var(--border-width) var(--border-style) var(--color-border);">
+              <div class="flex items-center">
+                <i-lucide [name]="icons.Info" [size]="16" [strokeWidth]="2" class="mr-2" style="color: rgba(255, 99, 132, 1);"></i-lucide>
+                <span class="uppercase text-xs">Details</span>
+              </div>
+            </th>
+          </tr>
+          </thead>
+
+          <!-- Skeleton-Loading-Animation -->
+          <tbody *ngIf="isLoading">
+          <tr *ngFor="let item of skeletonArray; let i = index"
+              [style]="i % 2 === 0 ?
+                  'background-color: var(--color-background);' :
+                  'background-color: var(--color-background-secondary);'">
+            <td class="py-4 px-6 truncate" style="border-bottom: var(--border-width) var(--border-style) var(--color-border);">
+              <div class="h-6 rounded animate-pulse" style="background-color: var(--color-border);"></div>
+            </td>
+            <td class="py-4 px-6 truncate" style="border-bottom: var(--border-width) var(--border-style) var(--color-border);">
+              <div class="h-6 rounded animate-pulse" style="background-color: var(--color-border);"></div>
+            </td>
+            <td class="py-4 px-6 truncate" style="border-bottom: var(--border-width) var(--border-style) var(--color-border);">
+              <div class="h-6 rounded animate-pulse" style="background-color: var(--color-border);"></div>
+            </td>
+            <td class="py-4 px-6 truncate" style="border-bottom: var(--border-width) var(--border-style) var(--color-border);">
+              <div class="h-6 rounded animate-pulse" style="background-color: var(--color-border);"></div>
+            </td>
+            <td class="py-4 px-6 truncate" style="border-bottom: var(--border-width) var(--border-style) var(--color-border);">
+              <div class="h-6 rounded animate-pulse" style="background-color: var(--color-border);"></div>
+            </td>
+          </tr>
+          </tbody>
+
+          <!-- Tatsächliche Daten -->
+          <tbody *ngIf="!isLoading && filteredIncidents.length > 0">
+          <tr *ngFor="let incident of filteredIncidents; let i = index"
+              [style]="i % 2 === 0 ?
+                  'background-color: var(--color-background);' :
+                  'background-color: var(--color-background-secondary);'">
+            <td class="py-4 px-6 text-sm truncate" style="color: var(--color-text); border-bottom: var(--border-width) var(--border-style) var(--color-border);">
+              {{ formatTimeAgo(incident.timestamp) }}
+            </td>
+            <td class="py-4 px-6 text-sm truncate" style="color: var(--color-text); border-bottom: var(--border-width) var(--border-style) var(--color-border);">
+                <span [ngClass]="incident.type === 'alarm' ? 'text-amber-500' : 'text-blue-500'">
+                  {{ incident.type === 'alarm' ? 'Alarm' : 'Log' }}
+                </span>
+            </td>
+            <td class="py-4 px-6 text-sm truncate" style="color: var(--color-text); border-bottom: var(--border-width) var(--border-style) var(--color-border);">
+              {{ getSourceLabel(incident.details.source) }}
+            </td>
+            <td class="py-4 px-6 text-sm truncate" style="color: var(--color-text); border-bottom: var(--border-width) var(--border-style) var(--color-border);">
+              <span [ngClass]="{
+                'text-green-500': incident.details.status === 'granted',
+                'text-red-500': incident.details.status === 'denied'
+              }">{{ getStatusLabel(incident.details.status) }}</span>
+            </td>
+            <td class="py-4 px-6 text-sm overflow-hidden" style="color: var(--color-text); border-bottom: var(--border-width) var(--border-style) var(--color-border);">
+              <div *ngIf="incident.details.tmp">Temperatur: {{ incident.details.tmp }} °C</div>
+              <div *ngIf="incident.details.lf">Luftfeuchtigkeit: {{ incident.details.lf }} %</div>
+              <div *ngIf="incident.details.ident">Card ID: {{ incident.details.ident }}</div>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Keine Daten -->
+    <div *ngIf="!isLoading && filteredIncidents.length === 0" class="text-center" style="color: var(--color-text-secondary);">
+      <p>Keine Daten verfügbar. Bitte passen Sie die Filter an.</p>
+    </div>
+  </div>
+</div>
+

@@ -9,13 +9,21 @@
     <i-lucide [name]=icons.House [size]="16" [strokeWidth]="2" class="text-icon"></i-lucide>
     Dashboard
   </a>
+    <a
+      routerLink="/incidents"
+      routerLinkActive="active-link"
+      class="route-link"
+    >
+      <i-lucide [name]=icons.ShieldAlert [size]="16" [strokeWidth]="2" class="text-icon"></i-lucide>
+      Incidents
+    </a>
   <a
     routerLink="/sensory"
     routerLinkActive="active-link"
     class="route-link"
   >
     <i-lucide [name]=icons.Activity [size]="16" [strokeWidth]="2" class="text-icon"></i-lucide>
-    Sensoren
+    Sensors
   </a>
   <a
     routerLink="/settings"

@@ -1,0 +1,11 @@
+.overflow-y-container {
+  overflow-y: auto;
+  overflow-x: hidden;
+  max-height: calc(100% - 1rem);
+}
+
+:host {
+  display: block;
+  height: 100%;
+  overflow: hidden;
+}
