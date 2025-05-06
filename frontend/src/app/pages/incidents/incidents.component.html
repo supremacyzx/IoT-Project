@@ -170,7 +170,7 @@
               {{ formatTimeAgo(incident.timestamp) }}
             </td>
             <td class="py-4 px-6 text-sm truncate" style="color: var(--color-text); border-bottom: var(--border-width) var(--border-style) var(--color-border);">
-                <span [ngClass]="incident.type === 'alarm' ? 'text-red-500' : 'text-green-500'">
+                <span [ngClass]="incident.type === 'alarm' ? 'text-amber-500' : 'text-blue-500'">
                   {{ incident.type === 'alarm' ? 'Alarm' : 'Log' }}
                 </span>
             </td>
@@ -178,12 +178,15 @@
               {{ getSourceLabel(incident.details.source) }}
             </td>
             <td class="py-4 px-6 text-sm truncate" style="color: var(--color-text); border-bottom: var(--border-width) var(--border-style) var(--color-border);">
-              {{ getStatusLabel(incident.details.status) }}
+              <span [ngClass]="{
+                'text-green-500': incident.details.status === 'granted',
+                'text-red-500': incident.details.status === 'denied'
+              }">{{ getStatusLabel(incident.details.status) }}</span>
             </td>
             <td class="py-4 px-6 text-sm overflow-hidden" style="color: var(--color-text); border-bottom: var(--border-width) var(--border-style) var(--color-border);">
               <div *ngIf="incident.details.tmp">Temperatur: {{ incident.details.tmp }} °C</div>
               <div *ngIf="incident.details.lf">Luftfeuchtigkeit: {{ incident.details.lf }} %</div>
-              <div *ngIf="incident.details.ident">ID: {{ incident.details.ident }}</div>
+              <div *ngIf="incident.details.ident">Card ID: {{ incident.details.ident }}</div>
             </td>
           </tr>
           </tbody>
@@ -197,3 +200,4 @@
     </div>
   </div>
 </div>
+
