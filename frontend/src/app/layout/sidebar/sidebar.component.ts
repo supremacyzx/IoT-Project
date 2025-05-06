@@ -1,7 +1,7 @@
 import {Component} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {RouterModule} from '@angular/router';
-import { LucideAngularModule, House, MessageCircle, User, Users, ChartColumn, Cog, Activity } from 'lucide-angular';
+import { LucideAngularModule, House, MessageCircle, User, Users, ChartColumn, Cog, Activity, ShieldAlert } from 'lucide-angular';
 
 @Component({
   selector: 'app-sidebar',
@@ -12,7 +12,7 @@ import { LucideAngularModule, House, MessageCircle, User, Users, ChartColumn, Co
 })
 export class SidebarComponent {
   // Kann später um Navigation und aktive Route-Funktionalität erweitert werden
-  icons = { House, MessageCircle, Users, User, ChartColumn, Cog, Activity };
+  icons = { House, MessageCircle, Users, User, ChartColumn, Cog, Activity, ShieldAlert };
 
 
 }

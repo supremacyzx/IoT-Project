@@ -9,6 +9,7 @@ import { AuthComponent } from './pages/auth/auth.component';
 import { AuthGuard } from './guards/auth.guard';
 import { LoggedInGuard } from './guards/logged-in.guard';
 import {ConfigComponent} from './pages/settings/config/config.component';
+import {IncidentsComponent} from './pages/incidents/incidents.component';
 
 
 export const routes: Routes = [
@@ -25,6 +26,11 @@ export const routes: Routes = [
   {
     path: 'dashboard',
     component: DashboardComponent,
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'incidents',
+    component: IncidentsComponent,
     canActivate: [AuthGuard]
   },
   {
