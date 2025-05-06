@@ -21,7 +21,7 @@ from flask_limiter.util import get_remote_address
 import time
 from functools import wraps
 from collections import defaultdict
-from mqtt_handler import mqtt_client
+from mqtt_handler import MQTTClient
 from flask_socketio import SocketIO  
 from flask_sock import Sock
 from mockDataGen import start_mock_sender
@@ -429,12 +429,13 @@ def health_check():
 
 if __name__ == '__main__':
     # Run the app
+    mqtt_client = MQTTClient()
     mqtt_client.start(clients)
     #comment out mock sender if not debugging
     #start_mock_sender(clients)
     print("MQTT client started and listening for messages")
     port = int(os.getenv('PORT', 5000))
-    app.run(debug=True, host='0.0.0.0', port=port)
+    app.run(debug=True,use_reloader=False, host='0.0.0.0', port=port)
     
 
 #endregion :: __main__

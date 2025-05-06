@@ -666,7 +666,7 @@ void connectToWifi(const char* ssid, const char* pass) {
 }
 
 void publishMessage(String topic, String msg) {
-  mqttClient.beginMessage(topic);  // Start the message with the topic
+  mqttClient.beginMessage(topic, false, 2);  // Start the message with the topic
   mqttClient.print(msg);           // Send the message content
   mqttClient.endMessage();         // End the message and send it
   //Serial.println("Sent MQTT msg to " + topic + " Value: " + msg);

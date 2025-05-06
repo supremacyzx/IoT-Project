@@ -6,6 +6,7 @@ import json
 import time
 import dotenv
 from dotenv import load_dotenv
+import uuid
 
 # Load environment variables
 load_dotenv()
@@ -28,15 +29,23 @@ DATABASE = os.path.join(BASE_DIR, DB_PATH)
 
 
 class MQTTClient:
+    _instances = []  # Class variable to track instances
+
     def __init__(self, socketio=None):
+        MQTTClient._instances.append(self)
+        print(f"Creating MQTT client instance #{len(MQTTClient._instances)}")
         self.configData = ""
         self.health = ""
         self.display_data = []
         self.hidden_data = []
-        self.client = mqtt.Client()
+        self.client_id = f"python-backend-{uuid.uuid4()}"  # Create a unique ID
+         
+        self.client = mqtt.Client(client_id=self.client_id)
         self.client.username_pw_set(MQTT_USER, MQTT_PASS)
+       
         self.client.on_connect = self.on_connect
         self.client.on_message = self.on_message
+        self.lastMsgTime = None
         self.socketio = socketio  # Store the socketio instance
         self.lastData = None
         self.clients = None
@@ -48,6 +57,7 @@ class MQTTClient:
         }
 
     def on_connect(self, client, userdata, flags, rc):
+        print(f"Subscribing to topics from client #{MQTTClient._instances.index(self) + 1}")
         client.subscribe(MQTT_TOPIC_DATA)
         client.subscribe(MQTT_TOPIC_INCIDENTS)
         client.subscribe(MQTT_TOPIC_CONFIG)
@@ -64,24 +74,25 @@ class MQTTClient:
 
     def on_message(self, client, userdata, msg):
         if msg.topic == MQTT_TOPIC_DATA:
+            
             try:
+                print(msg)
                 data = json.loads(msg.payload.decode())
                 data_updated = False
-                if data != self.lastData:
+                print("Data", data)
+
+                if self.lastData != data:
+                    data_updated = True
+                else:
+                    data_updated = False
+                # Emit the updated data to all connected clients
+                self.lastData = data
+                if data_updated:
+                   
+                    print("Data was updated: ", data_updated, data, self.lastData)
+                    print(time.time())
                     self._insert_into_db(data) #only insert if data is different
                     print(f"Received data: {data}")
-                if "tmp" in data:
-                    self.latest_data["tmp"] = data["tmp"]
-                    data_updated = True
-                if "lf" in data:
-                    self.latest_data["lf"] = data["lf"]
-                    data_updated = True
-                if "locked" in data:
-                    self.latest_data["locked"] = data["locked"]
-                    data_updated = True
-                
-                # Emit the updated data to all connected clients
-                if data_updated:
                     try:
                         message = f"Real data: {data}"
                         for ws in self.clients[:]:
@@ -89,10 +100,12 @@ class MQTTClient:
                                 ws.send(data)
                             except:
                                 self.clients.remove(ws)
+                            
                     except Exception as e:
                         print(f"Error sending message to clients: {e}")
-                self.lastData = data
+                
                 self.latest_data["last_insert"] = time.time()
+                
             except Exception as e:
                 print(f"Error processing MQTT message: {e}")
         elif msg.topic == MQTT_TOPIC_CONFIG:
@@ -107,6 +120,7 @@ class MQTTClient:
             except Exception as e:
                 print("Error parsing config: ", e)
         elif msg.topic == MQTT_TOPIC_INCIDENTS:
+            
             try:
         # Parse the JSON payload
                 payload = json.loads(msg.payload.decode('utf-8'))
@@ -121,6 +135,8 @@ class MQTTClient:
                 alarm_type = payload.get("type", "unknown")
                 value_json = json.dumps(payload)
                 timestamp = datetime.now()
+                print(timestamp)
+                print(value_json)
                 conn = sqlite3.connect(DATABASE)
                 cursor = conn.cursor()
                 cursor.execute('''
@@ -179,5 +195,4 @@ class MQTTClient:
 
 
 # Create the client instance
-mqtt_client = MQTTClient()
-get_display_data = mqtt_client.get_display_data
+
