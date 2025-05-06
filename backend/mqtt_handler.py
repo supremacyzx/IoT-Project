@@ -103,7 +103,7 @@ class MQTTClient:
                 if data["command"] == "configSend":
                     self.configData = data
                 if data["command"] == "healthStatus":
-                    self.health = "OK"
+                    self.health = data
             except Exception as e:
                 print("Error parsing config: ", e)
         elif msg.topic == MQTT_TOPIC_INCIDENTS:

@@ -412,7 +412,7 @@ def health_check():
                 return jsonify({'error': 'Timeout waiting for MQTT msg'}), 500
             if mqtt_client.health:
                 print(mqtt_client.health)
-                if mqtt_client.configData["msgID"] == msgID:
+                if mqtt_client.health["msgID"] == msgID:
                     return jsonify({'status': 'healthy', 'timestamp': datetime.now().isoformat()})
             attempts += 1
             time.sleep(0.5)
