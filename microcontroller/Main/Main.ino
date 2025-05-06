@@ -758,6 +758,16 @@ void listenForMessages() {
         } else {
           Serial.println("Failed to add new access ID");
         }
+    }else if (command == "healthCheck"){
+      String mqttMsg = "";
+        DynamicJsonDocument mqttdoc(512);
+        mqttdoc["msgID"] = docmessage["msgID"];
+        mqttdoc["command"] = "healthStatus";
+        mqttdoc["value"] = "healthy";
+        serializeJson(mqttdoc, mqttMsg);
+        Serial.println(mqttMsg);
+        publishMessage("RZ/config", mqttMsg);
+        Serial.println("Sent config to RZ/config");
     }
   }
 }

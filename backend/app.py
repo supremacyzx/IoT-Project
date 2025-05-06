@@ -402,7 +402,25 @@ def get_user_profile():
 # Health check endpoint
 @app.route('/health', methods=['GET'])
 def health_check():
-    return jsonify({'status': 'healthy', 'timestamp': datetime.now().isoformat()})
+    #healthCheck
+    try:
+        msgID = random.randint(0,100000)
+        mqtt_client.send_message("RZ/config", r'{"command":"healthCheck", "msgID":' + str(msgID) + '}')
+        attempts = 0
+        while True:
+            if attempts >= 200:
+                return jsonify({'error': 'Timeout waiting for MQTT msg'}), 500
+            if mqtt_client.health:
+                print(mqtt_client.health)
+                if mqtt_client.configData["msgID"] == msgID:
+                    return jsonify({'status': 'healthy', 'timestamp': datetime.now().isoformat()})
+            attempts += 1
+            time.sleep(0.5)
+
+    except Exception as e:
+        print("Error in API: ", e)
+        return jsonify({'error': str(e)}), 500
+   
 
 #endregion :: Routes
 

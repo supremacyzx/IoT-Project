@@ -30,6 +30,7 @@ DATABASE = os.path.join(BASE_DIR, DB_PATH)
 class MQTTClient:
     def __init__(self, socketio=None):
         self.configData = ""
+        self.health = ""
         self.display_data = []
         self.hidden_data = []
         self.client = mqtt.Client()
@@ -101,6 +102,8 @@ class MQTTClient:
                 print("Command received: ",data["command"])
                 if data["command"] == "configSend":
                     self.configData = data
+                if data["command"] == "healthStatus":
+                    self.health = "OK"
             except Exception as e:
                 print("Error parsing config: ", e)
         elif msg.topic == MQTT_TOPIC_INCIDENTS:
