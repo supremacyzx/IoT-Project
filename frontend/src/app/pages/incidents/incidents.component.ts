@@ -24,7 +24,7 @@ export class IncidentsComponent implements OnInit, OnDestroy {
 
   private subscription: Subscription | null = null;
   private loadingDelay = 300;
-  skeletonArray = Array(10).fill(0); // 10 Elemente für Skeleton-Loading
+  skeletonArray = Array(20).fill(0); // 10 Elemente für Skeleton-Loading
 
   constructor(private incidentsService: IncidentsService) {}
 
