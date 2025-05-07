@@ -61,6 +61,7 @@ struct Config {
   int sdaPin;
   int sclPin;
   int buzzerpin;
+  int presencePin;
   
   // Sensor Configuration
   int dhtType;
@@ -118,6 +119,7 @@ bool loadConfig() {
     config.rfidSSPin = 13;
     config.sdaPin = 15;
     config.sclPin = 14;
+    config.presencePin = 12;
     config.lcdAddress = 0x27;
     config.lcdCols = 16;
     config.lcdRows = 2;
@@ -159,6 +161,7 @@ bool loadConfig() {
   config.sdaPin = doc["pins"]["sda"] | 15;
   config.sclPin = doc["pins"]["scl"] | 14;
   config.buzzerpin = doc["pins"]["buzzerpin"] | 27;
+  config.presencePin = doc["pins"]["presencepin"] | 12;
   
   // Load sensor configuration
   config.dhtType = doc["sensors"]["dhtType"] | DHT11;
@@ -207,6 +210,7 @@ bool saveConfig() {
   pins["sda"] = config.sdaPin;
   pins["scl"] = config.sclPin;
   pins["buzzerpin"] = config.buzzerpin;
+  pins["presencepin"] = config.presencePin;
   
   // Sensor configuration
   JsonObject sensors = doc.createNestedObject("sensors");
@@ -278,6 +282,7 @@ String getConfigAsString() {
   pins["sda"] = config.sdaPin;
   pins["scl"] = config.sclPin;
   pins["buzzerpin"] = config.buzzerpin;
+  pins["presencepin"] = config.presencePin;
   
   // Sensor configuration
   JsonObject sensors = doc.createNestedObject("sensors");
@@ -337,6 +342,7 @@ void updateConfigFromJson(const String& jsonString) {
     if (pins.containsKey("sda")) config.sdaPin = pins["sda"];
     if (pins.containsKey("scl")) config.sclPin = pins["scl"];
     if (pins.containsKey("buzzerpin")) config.buzzerpin = pins["buzzerpin"];
+    if (pins.containsKey("presencepin")) config.presencePin = pins["presencepin"];
   }
 
   // Sensor configuration
@@ -692,6 +698,7 @@ void initComponents() {
   pinMode(config.ledGreenPin, OUTPUT);          
   pinMode(config.ledRedPin, OUTPUT);
   pinMode(config.buzzerpin, OUTPUT);
+  pinMode(config.presencePin, INPUT); // Set presence pin as input with pull-up resistor
 }
 
 
@@ -896,6 +903,52 @@ void loop() {
     humidityAlarming = false;
   }
  
+
+  //Presence Detection
+  
+  if (digitalRead(config.presencePin) == HIGH && armed) {
+    if (!presenceAlarming) {
+      // Publish temperature alarm start message to MQTT
+      String mqttMsg = "";
+      DynamicJsonDocument mqttdoc(512);
+      mqttdoc["type"] = "alarm";
+      mqttdoc["status"] = "start";
+      mqttdoc["source"] = "presence";
+      mqttdoc["presence"] = String(digitalRead(config.presencePin));
+      serializeJson(mqttdoc, mqttMsg);
+      publishMessage("RZ/incidents", mqttMsg);
+      Serial.println("Presence alarm triggered: " + mqttMsg);
+      presenceAlarming = true;
+    }
+    alarmSound(config.buzzerpin);
+    
+    
+      
+    
+  } else if (presenceAlarming && digitalRead(config.presencePin) == LOW && armed) {
+    // Temperature back to normal - send end message
+    String mqttMsg = "";
+    DynamicJsonDocument mqttdoc(512);
+    mqttdoc["type"] = "alarm";
+    mqttdoc["status"] = "end";
+    mqttdoc["source"] = "presence";
+    mqttdoc["presence"] = String(digitalRead(config.presencePin));
+    serializeJson(mqttdoc, mqttMsg);
+    publishMessage("RZ/incidents", mqttMsg);
+    Serial.println("Presence alarm ended: " + mqttMsg);
+    presenceAlarming = false;
+  }else if (digitalRead(config.presencePin) == HIGH && !armed) {
+    String mqttMsg = "";
+    DynamicJsonDocument mqttdoc(512);
+    mqttdoc["type"] = "alarm";
+    mqttdoc["status"] = "end";
+    mqttdoc["source"] = "presence";
+    mqttdoc["presence"] = "Alarm disabled via ID";
+    serializeJson(mqttdoc, mqttMsg);
+    publishMessage("RZ/incidents", mqttMsg);
+    Serial.println("Presence alarm ended: " + mqttMsg);
+    presenceAlarming = false;
+  }
   
 
   // Publish Sensor Data to MQTT only if data has changed 
