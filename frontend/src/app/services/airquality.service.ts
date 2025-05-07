@@ -32,6 +32,7 @@ export class AirqualityService {
         const correctedData = event.data.replace(/'/g, '"');
         const rawData = JSON.parse(correctedData);
         const newEntry: Airquality = {
+          id: Date.now(), // Füge eine eindeutige ID hinzu
           temperature: rawData.tmp,
           humidity: rawData.lf,
           lastUpdate: new Date().toISOString()
@@ -63,6 +64,7 @@ export class AirqualityService {
    */
   private transformData(entry: AirqualityEntry): Airquality {
     return {
+      id: entry.id || Date.now(), // ID vom Server verwenden oder eine generieren
       temperature: entry.data.tmp,
       humidity: entry.data.lf,
       lastUpdate: entry.timestamp
@@ -149,3 +151,4 @@ export class AirqualityService {
     this.dataLimit = limit;
   }
 }
+

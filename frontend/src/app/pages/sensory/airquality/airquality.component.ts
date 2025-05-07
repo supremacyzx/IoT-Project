@@ -50,26 +50,25 @@ export class AirqualityComponent implements OnInit, AfterViewInit, OnDestroy {
     // Abonniere Echtzeitdaten
     this.airqualityService.airqualityData$.subscribe((data) => {
       if (data.length > 0) {
+        this.airqualityData = data;
         const newestEntry = data[0];
-        // Prüfe, ob neue Daten vorhanden sind, die wir noch nicht verarbeitet haben
+
+        // Prüfe, ob neue Daten vorhanden sind
         const isNewData = this.lastProcessedDataId === null ||
                          (newestEntry.id !== undefined && newestEntry.id !== this.lastProcessedDataId);
 
-        this.airqualityData = data;
-
         if (this.viewMode === 'graph') {
-          if (isNewData && this.chart) {
-            // Nur den neuen Wert zum bestehenden Graphen hinzufügen
+          // Wenn der Chart existiert
+          if (this.chart) {
+            // Füge neue Daten hinzu oder aktualisiere den Chart wenn nötig
             this.updateChartWithNewData(newestEntry);
-            // Speichere die ID, damit wir diesen Eintrag nicht erneut verarbeiten
+            // Speichere ID für Referenz
             this.lastProcessedDataId = newestEntry.id ?? null;
-          } else if (!this.chart) {
-            // Nur initial den Chart komplett rendern
-            this.renderChart();
+          } else {
+            // Chart initialisieren, falls noch nicht vorhanden
+            setTimeout(() => this.renderChart(), 0);
             if (newestEntry.id !== undefined) {
               this.lastProcessedDataId = newestEntry.id;
-            } else {
-              this.lastProcessedDataId = null;
             }
           }
         }
@@ -375,47 +374,24 @@ export class AirqualityComponent implements OnInit, AfterViewInit, OnDestroy {
     // Neues Label für die X-Achse
     const newLabel = new Date(newEntry.lastUpdate).toLocaleString();
 
-    // Aktuelle Zeitstempel im Chart
-    const existingTimestamps = this.chart.data.labels?.map(label =>
-      typeof label === 'string' ? new Date(label).getTime() : 0
-    ) || [];
-
-    // Neuer Zeitstempel
-    const newTimestamp = new Date(newEntry.lastUpdate).getTime();
-
-    // Falls der neue Wert zeitlich nach dem letzten Wert im Chart liegt, füge ihn am Ende hinzu
-    if (existingTimestamps.length === 0 || newTimestamp > existingTimestamps[existingTimestamps.length - 1]) {
-      // Füge neue Daten am ENDE hinzu (neuester Eintrag kommt rechts)
-      this.chart.data.labels?.push(newLabel);
-      this.chart.data.datasets[0].data.push(newEntry.temperature);
-      this.chart.data.datasets[1].data.push(newEntry.humidity);
-    }
-    // Falls der neue Wert zeitlich vor dem ersten Wert im Chart liegt, füge ihn am Anfang hinzu
-    else if (newTimestamp < existingTimestamps[0]) {
-      this.chart.data.labels?.unshift(newLabel);
-      this.chart.data.datasets[0].data.unshift(newEntry.temperature);
-      this.chart.data.datasets[1].data.unshift(newEntry.humidity);
-    }
-    // Ansonsten müssten wir ihn an der richtigen Stelle einfügen (komplexerer Fall)
-    else {
-      // Dieser Fall ist selten, daher können wir zur Vereinfachung einfach den Chart neu rendern
-      this.renderChart();
-      return;
-    }
+    // Füge neue Daten hinzu
+    this.chart.data.labels?.push(newLabel);
+    this.chart.data.datasets[0].data.push(newEntry.temperature);
+    this.chart.data.datasets[1].data.push(newEntry.humidity);
 
     // Beschränke die Anzahl der angezeigten Datenpunkte auf das festgelegte Limit
     const displayLimit = this.filters.limit === 1 ? 2 : this.filters.limit;
 
     if (this.chart.data.labels && this.chart.data.labels.length > displayLimit) {
-      // Schneide überschüssige Daten vom ANFANG ab (älteste Daten entfernen)
+      // Entferne älteste Daten
       this.chart.data.labels = this.chart.data.labels.slice(-displayLimit);
       this.chart.data.datasets.forEach(dataset => {
         dataset.data = dataset.data.slice(-displayLimit);
       });
     }
 
-    // Aktualisiere den Chart ohne Animation für bessere Performance
-    this.chart.update('none');
+    // Aktualisiere den Chart mit Animation
+    this.chart.update();
   }
 
   formatTimeAgo(dateStr: string | Date): string {
@@ -470,4 +446,3 @@ export class AirqualityComponent implements OnInit, AfterViewInit, OnDestroy {
     return value.toFixed(1);
   }
 }
-
