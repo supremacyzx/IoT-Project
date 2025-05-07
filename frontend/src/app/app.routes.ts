@@ -10,6 +10,7 @@ import { AuthGuard } from './guards/auth.guard';
 import { LoggedInGuard } from './guards/logged-in.guard';
 import {ConfigComponent} from './pages/settings/config/config.component';
 import {IncidentsComponent} from './pages/incidents/incidents.component';
+import {AccessCardComponent} from './pages/settings/access-card/access-card.component';
 
 
 export const routes: Routes = [
@@ -71,6 +72,10 @@ export const routes: Routes = [
       {
         path: 'system',
         component: SystemComponent
+      },
+      {
+        path: 'access',
+        component: AccessCardComponent
       }
     ]
   }

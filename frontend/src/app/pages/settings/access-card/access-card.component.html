@@ -1,0 +1,67 @@
+<div class="max-w-full mx-4 h-full overflow-hidden">
+  <div class="space-y-6 flex flex-col h-full">
+    <!-- Header mit Titel -->
+    <div class="flex justify-between items-center sticky top-0 z-20 py-3" style="background-color: var(--color-background); border-bottom: var(--border-width) var(--border-style) var(--color-border);">
+      <div>
+        <h1 class="text-2xl font-bold" style="color: var(--color-text);">Zugangskarten</h1>
+        <p style="color: var(--color-text-muted); font-size: var(--font-size-md);">
+          Verwaltung von Zugangskarten für das Gebäude
+        </p>
+      </div>
+    </div>
+
+    <!-- Fehleranzeige -->
+    <div *ngIf="error" class="text-center mt-4">
+      <p style="color: var(--color-error);">{{ error }}</p>
+    </div>
+
+    <!-- Erfolgsmeldung -->
+    <div *ngIf="success" class="text-center mt-4">
+      <p style="color: var(--color-success);">{{ success }}</p>
+    </div>
+
+    <!-- Karten-Hinzufügen-Bereich -->
+    <div class="flex-1 overflow-hidden rounded-lg shadow-md p-4" style="border: var(--border-width) var(--border-style) var(--color-border);">
+      <div class="max-w-2xl mx-auto">
+        <h2 class="text-xl font-semibold mb-4" style="color: var(--color-text);">Neue Zugangskarte hinzufügen</h2>
+
+        <div class="flex items-center gap-4 mb-6">
+          <div class="flex-1 relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            </div>
+            <input
+              type="text"
+              [(ngModel)]="cardId"
+              placeholder="Karten-ID eingeben (optional)"
+              class="w-full py-2 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-primary rounded-md"
+              style="background-color: var(--color-background-secondary); border: var(--border-width) var(--border-style) var(--color-border); color: var(--color-text);"
+            >
+          </div>
+
+          <button
+            (click)="addCard()"
+            class="px-4 py-2 rounded-md flex items-center justify-center gap-2 disabled:opacity-50"
+            style="background-color: var(--color-primary); color: white;"
+            [disabled]="isLoading"
+          >
+            <i-lucide [name]="icons.Plus" [size]="18" [strokeWidth]="2"></i-lucide>
+            <span>{{ isLoading ? 'Wird hinzugefügt...' : 'Karte hinzufügen' }}</span>
+          </button>
+        </div>
+
+        <div class="p-4 rounded-md" style="background-color: var(--color-background-secondary); border: var(--border-width) var(--border-style) var(--color-border);">
+          <div class="flex items-start gap-3">
+            <i-lucide [name]="icons.IdCard" [size]="20" [strokeWidth]="2" style="color: var(--color-primary);"></i-lucide>
+            <div>
+              <h3 class="font-medium" style="color: var(--color-text);">Hinweis zur Kartenregistrierung</h3>
+              <p style="color: var(--color-text-muted); font-size: var(--font-size-sm);">
+                Klicken Sie auf "Karte hinzufügen" und halten Sie dann die Zugangskarte an den Kartenleser.
+                Das System wird automatisch die neue Karte registrieren.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
