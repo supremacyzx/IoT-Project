@@ -7,3 +7,4 @@ flask-jwt-extended
 werkzeug
 flask_limiter
 flask-sock
+gunicorn

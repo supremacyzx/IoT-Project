@@ -22,7 +22,6 @@ import time
 from functools import wraps
 from collections import defaultdict
 from mqtt_handler import MQTTClient
-from flask_socketio import SocketIO  
 from flask_sock import Sock
 from mockDataGen import start_mock_sender
 
