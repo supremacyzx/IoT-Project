@@ -38,6 +38,7 @@ bool lastarmed;
 bool humidityAlarming = false;
 bool tempAlarming = false;
 bool alarmSilenced = false;
+bool presenceAlarming = false;
 
 // Configuration variables - will be loaded from LittleFS
 struct Config {
@@ -101,7 +102,7 @@ bool initFS() {
 
 bool loadConfig() {
   File configFile = LittleFS.open(CONFIG_FILE, "r");
-  if (configFile) {
+  if (!configFile) {
     Serial.println("Failed to open config file, using defaults");
     // Set default values
     strcpy(config.ssid, "FES-SuS");
@@ -920,7 +921,7 @@ void loop() {
       Serial.println("Presence alarm triggered: " + mqttMsg);
       presenceAlarming = true;
     }
-    alarmSound(config.buzzerpin);
+   // alarmSound(config.buzzerpin);
     
     
       
@@ -937,7 +938,7 @@ void loop() {
     publishMessage("RZ/incidents", mqttMsg);
     Serial.println("Presence alarm ended: " + mqttMsg);
     presenceAlarming = false;
-  }else if (digitalRead(config.presencePin) == HIGH && !armed) {
+  }else if (digitalRead(config.presencePin) == HIGH && !armed && presenceAlarming) {
     String mqttMsg = "";
     DynamicJsonDocument mqttdoc(512);
     mqttdoc["type"] = "alarm";
