@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { LucideAngularModule, LogIn, LayoutDashboard, Thermometer, Droplets, BarChart3, Bell } from 'lucide-angular';
+import { LucideAngularModule, LogIn, LayoutDashboard, Thermometer, Bell, Lock } from 'lucide-angular';
 import {SlideContentModel} from '../../../models/slideContent.model';
 import { SlideshowComponent } from '../../components/slideshow/slideshow.component';
 
@@ -22,8 +22,7 @@ export class LandingComponent {
     LogIn,
     LayoutDashboard,
     Thermometer,
-    Droplets,
-    BarChart3,
+    Lock,
     Bell
   };
 
