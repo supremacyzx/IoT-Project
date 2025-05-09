@@ -32,6 +32,7 @@ html, body {
   /* Color with RGB values for alpha operations */
   --color-primary-rgb: 0, 123, 255;
   --color-border-rgb: 222, 226, 230;
+  --color-error-rgb: 220, 53, 69;
 
   /* Windowbar - Light Mode */
   --color-windowbar-bg: #f0f0f0;
@@ -136,6 +137,7 @@ html, body {
   /* Color with RGB values for alpha operations */
   --color-primary-rgb: 30, 144, 255;
   --color-border-rgb: 36, 36, 36;
+  --color-error-rgb: 220, 53, 69;
 
   /* Windowbar */
   --color-windowbar-bg: #111111;
@@ -580,3 +582,4 @@ router-outlet {
 .fade-in {
   animation: fadeIn var(--transition-medium) ease-in-out;
 }
+

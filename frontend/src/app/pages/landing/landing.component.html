@@ -1,0 +1,104 @@
+<div class="max-w-full mx-4 h-full overflow-hidden">
+  <div class="space-y-6 flex flex-col h-full">
+    <!-- Header - Titel und Untertitel entfernt -->
+    <div class="flex justify-between items-center py-3">
+      <div>
+        <!-- Titel und Untertitel wurden hier entfernt -->
+      </div>
+    </div>
+
+    <!-- Hero Section -->
+    <div class="flex flex-col md:flex-row gap-6 mt-4">
+      <!-- Left Side: Text Content -->
+      <div class="flex-1 flex flex-col justify-center">
+        <h2 class="text-3xl font-bold mb-4" style="color: var(--color-text);">
+          Smart Home in Echtzeit überwachen
+        </h2>
+        <p class="mb-6" style="color: var(--color-text-secondary); line-height: var(--line-height);">
+          Unser IoT-Dashboard bietet Ihnen umfassende Einblicke in Ihr Zuhause. Überwachen Sie Luftqualität,
+          Temperatur und Feuchtigkeit in Echtzeit und erhalten Sie wertvolle Daten zur Optimierung Ihres Wohnumfelds.
+        </p>
+
+        <div class="flex flex-col sm:flex-row gap-4 mt-2">
+          <button
+            (click)="navigateTo('/auth')"
+            class="px-6 py-3 rounded-md flex items-center justify-center"
+            style="background-color: var(--color-primary); color: var(--color-text-inverted); border: var(--border-width) var(--border-style) var(--color-primary);"
+          >
+            <i-lucide [name]="icons.LogIn" [size]="18" [strokeWidth]="2" class="mr-2"></i-lucide>
+            Anmelden
+          </button>
+          <button
+            (click)="navigateTo('/dashboard')"
+            class="px-6 py-3 rounded-md flex items-center justify-center"
+            style="background-color: var(--color-background-secondary); color: var(--color-text); border: var(--border-width) var(--border-style) var(--color-border);"
+          >
+            <i-lucide [name]="icons.LayoutDashboard" [size]="18" [strokeWidth]="2" class="mr-2"></i-lucide>
+            Dashboard erkunden
+          </button>
+        </div>
+      </div>
+
+      <!-- Right Side: Feature Cards -->
+      <div class="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <!-- Feature Card 1 -->
+        <div class="p-5 rounded-lg" style="background-color: var(--color-background-secondary); border: var(--border-width) var(--border-style) var(--color-border);">
+          <div class="p-3 rounded-full inline-flex mb-4" style="background-color: rgba(var(--color-primary-rgb), 0.1);">
+            <i-lucide [name]="icons.Thermometer" [size]="24" [strokeWidth]="2" style="color: var(--color-primary);"></i-lucide>
+          </div>
+          <h3 class="text-lg font-semibold mb-2" style="color: var(--color-text);">Temperaturüberwachung</h3>
+          <p style="color: var(--color-text-secondary);">Echtzeit-Daten zur Temperatur in verschiedenen Räumen.</p>
+        </div>
+
+        <!-- Feature Card 2 -->
+        <div class="p-5 rounded-lg" style="background-color: var(--color-background-secondary); border: var(--border-width) var(--border-style) var(--color-border);">
+          <div class="p-3 rounded-full inline-flex mb-4" style="background-color: rgba(var(--color-primary-rgb), 0.1);">
+            <i-lucide [name]="icons.Droplets" [size]="24" [strokeWidth]="2" style="color: var(--color-primary);"></i-lucide>
+          </div>
+          <h3 class="text-lg font-semibold mb-2" style="color: var(--color-text);">Luftfeuchtigkeitssensor</h3>
+          <p style="color: var(--color-text-secondary);">Überwachen Sie die Luftfeuchtigkeit für ein optimales Raumklima.</p>
+        </div>
+
+        <!-- Feature Card 3 -->
+        <div class="p-5 rounded-lg" style="background-color: var(--color-background-secondary); border: var(--border-width) var(--border-style) var(--color-border);">
+          <div class="p-3 rounded-full inline-flex mb-4" style="background-color: rgba(var(--color-primary-rgb), 0.1);">
+            <i-lucide [name]="icons.BarChart3" [size]="24" [strokeWidth]="2" style="color: var(--color-primary);"></i-lucide>
+          </div>
+          <h3 class="text-lg font-semibold mb-2" style="color: var(--color-text);">Datenvisualisierung</h3>
+          <p style="color: var(--color-text-secondary);">Übersichtliche Grafiken und Diagramme für alle Sensorwerte.</p>
+        </div>
+
+        <!-- Feature Card 4 -->
+        <div class="p-5 rounded-lg" style="background-color: var(--color-background-secondary); border: var(--border-width) var(--border-style) var(--color-border);">
+          <div class="p-3 rounded-full inline-flex mb-4" style="background-color: rgba(var(--color-primary-rgb), 0.1);">
+            <i-lucide [name]="icons.Bell" [size]="24" [strokeWidth]="2" style="color: var(--color-primary);"></i-lucide>
+          </div>
+          <h3 class="text-lg font-semibold mb-2" style="color: var(--color-text);">Benachrichtigungen</h3>
+          <p style="color: var(--color-text-secondary);">Warnungen bei ungewöhnlichen Messwerten oder Ereignissen.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Technologie- und Hardware-Slideshow-Sektion -->
+    <div class="mt-12">
+      <div class="text-center mb-8">
+        <h2 class="text-2xl font-bold mb-3" style="color: var(--color-text);">Technologien</h2>
+        <p style="color: var(--color-text-secondary);" class="max-w-2xl mx-auto">
+          Unser IoT-Dashboard nutzt modernste Technologien und Hardware-Komponenten für zuverlässige und effiziente Leistung.
+        </p>
+      </div>
+
+      <!-- Technologie-Slideshow -->
+      <div class="mb-8">
+        <h3 class="text-lg font-semibold mb-4 ml-4" style="color: var(--color-text);">Software-Stack</h3>
+        <app-slideshow [slideShowElements]="techStack" direction="left"></app-slideshow>
+      </div>
+
+      <!-- Hardware-Slideshow -->
+      <div>
+        <h3 class="text-lg font-semibold mb-4 ml-4" style="color: var(--color-text);">Hardware-Stack</h3>
+        <app-slideshow [slideShowElements]="hardwareStack" direction="right"></app-slideshow>
+      </div>
+    </div>
+  </div>
+</div>

@@ -8,15 +8,15 @@ import { AirqualityComponent } from './pages/sensory/airquality/airquality.compo
 import { AuthComponent } from './pages/auth/auth.component';
 import { AuthGuard } from './guards/auth.guard';
 import { LoggedInGuard } from './guards/logged-in.guard';
-import {ConfigComponent} from './pages/settings/config/config.component';
-import {IncidentsComponent} from './pages/incidents/incidents.component';
-import {AccessCardComponent} from './pages/settings/access-card/access-card.component';
-
+import { ConfigComponent } from './pages/settings/config/config.component';
+import { IncidentsComponent } from './pages/incidents/incidents.component';
+import { AccessCardComponent } from './pages/settings/access-card/access-card.component';
+import { LandingComponent } from './pages/landing/landing.component';
 
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: 'dashboard',
+    component: LandingComponent,
     pathMatch: 'full'
   },
   {
@@ -47,7 +47,6 @@ export const routes: Routes = [
       {
         path: 'airquality',
         component: AirqualityComponent,
-
       }
     ]
   },
@@ -78,6 +77,10 @@ export const routes: Routes = [
         component: AccessCardComponent
       }
     ]
+  },
+  // Wildcard-Route für nicht gefundene Seiten - sollte am Ende stehen
+  {
+    path: '**',
+    redirectTo: ''
   }
 ];
-
