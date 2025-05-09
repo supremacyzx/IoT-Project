@@ -1,18 +1,16 @@
 <div class="slideshow-container">
   <div class="slide-track" [ngClass]="direction === 'left' ? 'slide-left' : 'slide-right'">
-    <!-- Erste Kopie der Elemente -->
     @for (item of slideShowElements; track $index) {
       <div class="slide-item">
         <a [href]="item.link" target="_blank" class="logo-link">
-          <img [src]="item.image" alt="{{ item.link }}" />
-        </a>
-      </div>
-    }
-    <!-- Zweite Kopie für den nahtlosen Übergang -->
-    @for (item of slideShowElements; track $index) {
-      <div class="slide-item">
-        <a [href]="item.link" target="_blank" class="logo-link">
-          <img [src]="item.image" alt="{{ item.link }}" />
+          <img
+            [ngSrc]="item.image"
+            alt="{{ item.link }}"
+            width="120"
+            height="120"
+            priority="{{$index < 4}}"
+            (error)="handleImageError($event)"
+          />
         </a>
       </div>
     }

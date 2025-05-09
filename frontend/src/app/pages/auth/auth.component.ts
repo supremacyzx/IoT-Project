@@ -41,16 +41,19 @@ export class AuthComponent {
     private authService: AuthService,
     private router: Router
   ) {
+    // Initialisiere das Login-Formular
     this.loginForm = this.fb.group({
       username: ['', [Validators.required]],
       password: ['', [Validators.required]]
     });
   }
 
+  // Passwort-Sichtbarkeit umschalten
   togglePasswordVisibility(): void {
     this.showPassword = !this.showPassword;
   }
 
+  // Formular absenden
   onSubmit(): void {
     if (this.loginForm.invalid) {
       return;

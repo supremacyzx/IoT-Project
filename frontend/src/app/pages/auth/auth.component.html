@@ -1,139 +1,79 @@
-<div class="min-h-screen w-full flex items-center justify-center" style="background-color: var(--color-background);">
-  <!-- Auth-Card mit zwei Spalten im größeren Viewport -->
-  <div class="w-full max-w-4xl rounded-lg shadow-lg overflow-hidden flex flex-col md:flex-row" style="background-color: var(--color-background-secondary); border: var(--border-width) var(--border-style) var(--color-border);">
+<div class="auth-container flex flex-col items-center justify-center min-h-screen p-6">
+  <!-- Logo -->
+  <div class="logo mb-8">
+    <img src="/images/Logo.svg" alt="Pentaguard Logo" class="h-20 mx-auto">
+  </div>
 
-    <!-- Linke Spalte mit Illustration (nur auf mittleren/großen Bildschirmen) -->
-    <div class="hidden md:flex md:w-1/2 relative items-center justify-center p-8" style="background: linear-gradient(135deg, rgba(var(--color-primary-rgb), 0.1) 0%, rgba(var(--color-primary-rgb), 0.2) 100%);">
-      <div class="text-center">
-        <!-- Logo/Icon oben -->
-        <div class="flex justify-center mb-8">
-          <div class="w-16 h-16 rounded-full flex items-center justify-center" style="background-color: var(--color-primary);">
-            <i-lucide [name]="icons.LayoutDashboard" [size]="32" [strokeWidth]="1.5" style="color: var(--color-text-inverted);"></i-lucide>
-          </div>
-        </div>
-        <h2 class="text-2xl font-bold mb-4" style="color: var(--color-text);">IoT-Dashboard</h2>
-        <p class="mb-6" style="color: var(--color-text-secondary);">Überwachen Sie Ihr Smart Home in Echtzeit und behalten Sie alle wichtigen Sensordaten im Blick.</p>
+  <!-- Login-Formular -->
+  <div class="auth-card w-full max-w-sm p-8 rounded-lg shadow-lg">
+    <h1 class="text-2xl font-bold text-center mb-8">Willkommen zurück</h1>
 
-        <!-- Illustration -->
-        <div class="w-full max-w-xs mx-auto">
-          <img src="assets/images/iot-illustration.svg" alt="IoT Dashboard Illustration" class="w-full h-auto" onerror="this.style.display='none'">
-        </div>
-      </div>
-    </div>
-
-    <!-- Rechte Spalte mit Login-Formular -->
-    <div class="md:w-1/2 p-8">
-      <div class="mb-8">
-        <h1 class="text-2xl font-bold mb-2" style="color: var(--color-text);">Anmelden</h1>
-        <p style="color: var(--color-text-muted); font-size: var(--font-size-md);">
-          Melden Sie sich an, um auf Ihr Dashboard zuzugreifen
-        </p>
-      </div>
-
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-6">
       <!-- Fehlermeldung -->
-      <div *ngIf="errorMessage" class="mb-6 rounded-md p-4 flex items-start" style="background-color: rgba(var(--color-error-rgb), 0.1); border-left: 4px solid var(--color-error);">
-        <i-lucide [name]="icons.AlertTriangle" [size]="20" [strokeWidth]="2" class="mr-3 flex-shrink-0 mt-0.5" style="color: var(--color-error);"></i-lucide>
-        <div>
-          <p class="font-medium" style="color: var(--color-error);">Anmeldefehler</p>
-          <p class="text-sm mt-1" style="color: var(--color-text-secondary);">{{ errorMessage }}</p>
+      <div *ngIf="errorMessage" class="error-message p-4 rounded-md flex items-center">
+        <i-lucide [name]="icons.AlertTriangle" [size]="20" class="mr-2"></i-lucide>
+        <span>{{ errorMessage }}</span>
+        <button type="button" (click)="errorMessage = ''" class="ml-auto">
+          <i-lucide [name]="icons.XCircle" [size]="18"></i-lucide>
+        </button>
+      </div>
+
+      <!-- Benutzername -->
+      <div>
+        <label for="username" class="block text-sm font-medium mb-2">Benutzername</label>
+        <div class="input-group">
+          <i-lucide [name]="icons.User" [size]="18" class="input-icon"></i-lucide>
+          <input
+            type="text"
+            id="username"
+            formControlName="username"
+            class="input-field"
+            placeholder="Benutzername eingeben"
+          >
         </div>
       </div>
 
-      <!-- Login-Formular -->
-      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-5">
-        <!-- Benutzername -->
-        <div class="space-y-2">
-          <label for="username" class="block text-sm font-medium" style="color: var(--color-text-secondary);">Benutzername</label>
-          <div class="relative">
-            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <i-lucide [name]="icons.User" [size]="18" [strokeWidth]="2" style="color: var(--color-text-muted);"></i-lucide>
-            </div>
-            <input
-              id="username"
-              type="text"
-              formControlName="username"
-              class="w-full pl-10 pr-3 py-3 rounded-md"
-              style="background-color: var(--color-background); color: var(--color-text); border: var(--border-width) var(--border-style) var(--color-border);"
-              placeholder="Benutzername eingeben"
-              autocomplete="username"
-            >
-          </div>
-          <span *ngIf="loginForm.get('username')?.invalid && loginForm.get('username')?.touched"
-                class="text-sm flex items-center" style="color: var(--color-error);">
-            <i-lucide [name]="icons.XCircle" [size]="14" [strokeWidth]="2" class="mr-1"></i-lucide>
-            Benutzername ist erforderlich
-          </span>
+      <!-- Passwort -->
+      <div>
+        <label for="password" class="block text-sm font-medium mb-2">Passwort</label>
+        <div class="input-group">
+          <i-lucide [name]="icons.Lock" [size]="18" class="input-icon"></i-lucide>
+          <input
+            [type]="showPassword ? 'text' : 'password'"
+            id="password"
+            formControlName="password"
+            class="input-field"
+            placeholder="Passwort eingeben"
+          >
+          <button type="button" class="toggle-password" (click)="togglePasswordVisibility()">
+            <i-lucide [name]="showPassword ? icons.EyeOff : icons.Eye" [size]="18"></i-lucide>
+          </button>
         </div>
+      </div>
 
-        <!-- Passwort -->
-        <div class="space-y-2">
-          <label for="password" class="block text-sm font-medium" style="color: var(--color-text-secondary);">Passwort</label>
-          <div class="relative">
-            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <i-lucide [name]="icons.Lock" [size]="18" [strokeWidth]="2" style="color: var(--color-text-muted);"></i-lucide>
-            </div>
-            <input
-              id="password"
-              [type]="showPassword ? 'text' : 'password'"
-              formControlName="password"
-              class="w-full pl-10 pr-10 py-3 rounded-md"
-              style="background-color: var(--color-background); color: var(--color-text); border: var(--border-width) var(--border-style) var(--color-border);"
-              placeholder="Passwort eingeben"
-              autocomplete="current-password"
-            >
-            <button
-              type="button"
-              class="absolute inset-y-0 right-0 pr-3 flex items-center"
-              (click)="togglePasswordVisibility()"
-              style="color: var(--color-text-muted); background: transparent; border: none; cursor: pointer;"
-            >
-              <i-lucide [name]="showPassword ? icons.EyeOff : icons.Eye" [size]="18" [strokeWidth]="2"></i-lucide>
-            </button>
-          </div>
-          <span *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
-                class="text-sm flex items-center" style="color: var(--color-error);">
-            <i-lucide [name]="icons.XCircle" [size]="14" [strokeWidth]="2" class="mr-1"></i-lucide>
-            Passwort ist erforderlich
-          </span>
-        </div>
+      <!-- Login-Button -->
+      <button
+        type="submit"
+        class="btn-primary w-full mt-8"
+        [disabled]="loginForm.invalid || isLoading"
+      >
+        <ng-container *ngIf="isLoading">
+          <i-lucide [name]="icons.Loader2" [size]="20" class="animate-spin mr-2"></i-lucide>
+          Anmelden...
+        </ng-container>
+        <ng-container *ngIf="!isLoading">
+          <i-lucide [name]="icons.LogIn" [size]="20" class="mr-2"></i-lucide>
+          Anmelden
+        </ng-container>
+      </button>
+    </form>
 
-        <!-- Remember me checkbox and Forgot password -->
-        <div class="flex justify-between items-center">
-          <div class="flex items-center">
-            <input
-              id="remember-me"
-              type="checkbox"
-              class="mr-2"
-              style="border-radius: 4px; border: var(--border-width) var(--border-style) var(--color-border);"
-            >
-            <label for="remember-me" class="text-sm" style="color: var(--color-text-secondary);">Angemeldet bleiben</label>
-          </div>
-          <a href="#" class="text-sm" style="color: var(--color-primary);">Passwort vergessen?</a>
-        </div>
-
-        <!-- Login Button -->
-        <button
-          type="submit"
-          [disabled]="loginForm.invalid || isLoading"
-          class="w-full py-3 px-4 font-medium rounded-md flex items-center justify-center transition-all"
-          style="background-color: var(--color-primary); color: var(--color-text-inverted); border: none; opacity: 1;"
-          [ngStyle]="{'opacity': (loginForm.invalid || isLoading) ? 'var(--opacity-disabled)' : '1'}"
-        >
-          <span *ngIf="!isLoading" class="flex items-center">
-            <i-lucide [name]="icons.LogIn" [size]="18" [strokeWidth]="2" class="mr-2"></i-lucide>
-            Anmelden
-          </span>
-          <span *ngIf="isLoading" class="flex justify-center items-center">
-            <i-lucide [name]="icons.Loader2" [size]="18" [strokeWidth]="2" class="mr-2 animate-spin"></i-lucide>
-            Wird geladen...
-          </span>
-        </button>
-
-        <!-- Zurück zur Startseite -->
-        <div class="text-center mt-4">
-          <a [routerLink]="['']" class="text-sm" style="color: var(--color-primary);">Zurück zur Startseite</a>
-        </div>
-      </form>
+    <!-- Zurück zur Startseite -->
+    <div class="text-center mt-8">
+      <a [routerLink]="['/']" class="text-sm hover:underline inline-flex items-center justify-center">
+        <i-lucide [name]="icons.LayoutDashboard" [size]="16" class="mr-1"></i-lucide>
+        Zurück zur Startseite
+      </a>
     </div>
   </div>
 </div>
