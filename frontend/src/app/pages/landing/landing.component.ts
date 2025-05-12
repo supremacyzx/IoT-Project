@@ -32,8 +32,8 @@ export class LandingComponent {
       link: 'https://angular.io/'
     },
     {
-      image: 'images/flask.svg',
-      link: 'https://flask.palletsprojects.com/'
+      image: 'images/python.svg',
+      link: 'https://www.python.org/'
     },
     {
       image: 'images/docker.svg',
@@ -50,6 +50,10 @@ export class LandingComponent {
     {
       image: 'images/mqtt.svg',
       link: 'https://mqtt.org/'
+    },
+    {
+      image: 'images/ntfy.svg',
+      link: 'https://ntfy.sh/'
     }
   ];
 

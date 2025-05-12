@@ -49,9 +49,12 @@ export class AirqualityComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // Abonniere Echtzeitdaten
     this.airqualityService.airqualityData$.subscribe((data) => {
-      if (data.length > 0) {
-        this.airqualityData = data;
-        const newestEntry = data[0];
+      // Filtere nur gültige Temperatur/Luftfeuchtigkeitsdaten
+      const validData = data.filter(entry => this.isValidTemperatureData(entry));
+
+      if (validData.length > 0) {
+        this.airqualityData = validData;
+        const newestEntry = validData[0];
 
         // Prüfe, ob neue Daten vorhanden sind
         const isNewData = this.lastProcessedDataId === null ||
@@ -444,5 +447,21 @@ export class AirqualityComponent implements OnInit, AfterViewInit, OnDestroy {
   // Methode zum Formatieren von Zahlen auf eine Dezimalstelle
   formatToOneDecimal(value: number): string {
     return value.toFixed(1);
+  }
+
+  // Neue Hilfsfunktion zur Überprüfung gültiger Temperaturdaten
+  private isValidTemperatureData(data: any): boolean {
+    // Prüfe zuerst, ob es sich um ein gültiges Airquality-Objekt handelt
+    if (!data) return false;
+
+    // Prüfe, ob es sich um einen Alarm- oder Log-Eintrag handelt (diese ignorieren)
+    if (data.type === 'alarm' || data.type === 'log') return false;
+
+    // Prüfe, ob Temperatur- und Luftfeuchtigkeitswerte vorhanden sind
+    // Sie können entweder als tmp/lf oder als temperature/humidity vorliegen
+    const hasTemperature = (data.tmp !== undefined || data.temperature !== undefined);
+    const hasHumidity = (data.lf !== undefined || data.humidity !== undefined);
+
+    return hasTemperature && hasHumidity;
   }
 }
