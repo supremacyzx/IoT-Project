@@ -63,6 +63,15 @@
             Zugang
           </button>
           <button
+            (click)="filterBySource('presence')"
+            class="px-3 py-1.5 text-sm font-medium rounded-md"
+            [style]="selectedSourceFilter === 'presence' ?
+              'background-color: transparent; color: var(--color-primary); border: 1px solid transparent;' :
+              'background-color: transparent; color: var(--color-text); border: 1px solid transparent;'"
+          >
+            Präsenz
+          </button>
+          <button
             (click)="filterBySource('temperature')"
             class="px-3 py-1.5 text-sm font-medium rounded-md"
             [style]="selectedSourceFilter === 'temperature' ?

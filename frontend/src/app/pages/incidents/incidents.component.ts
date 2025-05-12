@@ -19,7 +19,7 @@ export class IncidentsComponent implements OnInit, OnDestroy {
   isLoading = false;
   error: string | null = null;
   selectedTypeFilter: 'all' | 'log' | 'alarm' = 'all';
-  selectedSourceFilter: 'all' | 'Access' | 'temperature' | 'humidity' = 'all';
+  selectedSourceFilter: 'all' | 'Access' | 'temperature' | 'presence' | 'humidity' = 'all';
   icons = { Clock, Tag, Database, BarChart, Info, Filter };
 
   private subscription: Subscription | null = null;
@@ -79,7 +79,7 @@ export class IncidentsComponent implements OnInit, OnDestroy {
     this.applyFilters(); // Filter direkt anwenden
   }
 
-  filterBySource(source: 'all' | 'Access' | 'temperature' | 'humidity'): void {
+  filterBySource(source: 'all' | 'Access' | 'temperature' | 'presence' | 'humidity'): void {
     this.selectedSourceFilter = source;
     this.applyFilters(); // Filter direkt anwenden
   }
@@ -108,6 +108,7 @@ export class IncidentsComponent implements OnInit, OnDestroy {
   getSourceLabel(source: string): string {
     switch (source) {
       case 'Access': return 'Zugang';
+      case 'presence': return 'Präsenz';
       case 'temperature': return 'Temperatur';
       case 'humidity': return 'Luftfeuchtigkeit';
       default: return source;
