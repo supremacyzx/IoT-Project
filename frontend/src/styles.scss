@@ -32,6 +32,7 @@ html, body {
   /* Color with RGB values for alpha operations */
   --color-primary-rgb: 0, 123, 255;
   --color-border-rgb: 222, 226, 230;
+  --color-error-rgb: 220, 53, 69;
 
   /* Windowbar - Light Mode */
   --color-windowbar-bg: #f0f0f0;
@@ -61,7 +62,7 @@ html, body {
   --color-text-muted: #adb5bd;
   --color-text-inverted: #ffffff;
 
-  --color-primary: #007bff;
+  --color-primary: #0BD5FD;
   --color-primary-hover: #0056b3;
   --color-primary-active: #004085;
 
@@ -136,6 +137,7 @@ html, body {
   /* Color with RGB values for alpha operations */
   --color-primary-rgb: 30, 144, 255;
   --color-border-rgb: 36, 36, 36;
+  --color-error-rgb: 220, 53, 69;
 
   /* Windowbar */
   --color-windowbar-bg: #111111;
@@ -166,7 +168,7 @@ html, body {
   --color-text-muted: #6c757d;
   --color-text-inverted: #212529;
 
-  --color-primary: #ff1e8f;
+  --color-primary: #0BD5FD;
   --color-primary-hover: #1c7ed6;
   --color-primary-active: #1864ab;
 
@@ -580,3 +582,4 @@ router-outlet {
 .fade-in {
   animation: fadeIn var(--transition-medium) ease-in-out;
 }
+

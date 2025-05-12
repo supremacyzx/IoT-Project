@@ -1,63 +1,154 @@
-:host {
-  display: block;
-  height: 100%;
-  width: 100%;
-  background-color: var(--color-background);
+.auth-container {
+  background: var(--color-background);
   color: var(--color-text);
-  font-family: var(--font-family);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+
 }
 
-.min-h-screen {
-  min-height: 100vh;
+.auth-card {
+  background: var(--color-background-secondary);
+  border: 1px solid var(--color-border);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  backdrop-filter: blur(10px);
 }
 
-// Überschreibe Tailwind-Klassen mit unseren Designvariablen
-.bg-gray-100 {
-  background-color: var(--color-background);
+.input-group {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
 }
 
-.bg-white {
-  background-color: var(--color-background-secondary);
-}
-
-.text-gray-800 {
-  color: var(--color-text);
-}
-
-.text-gray-700 {
+.input-icon {
+  position: absolute;
+  left: 14px;
   color: var(--color-text-secondary);
+  transition: color 0.2s ease;
 }
 
-.text-red-600 {
+.input-field {
+  width: 100%;
+  padding: 12px 14px 12px 42px;
+  border: 1.5px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-background);
+  color: var(--color-text);
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+}
+
+.input-field:hover {
+  border-color: rgba(var(--color-primary-rgb), 0.5);
+}
+
+.input-field:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.15);
+  outline: none;
+}
+
+.input-field:focus + .input-icon {
+  color: var(--color-primary);
+}
+
+.toggle-password {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.toggle-password:hover {
+  color: var(--color-primary);
+  background: rgba(var(--color-primary-rgb), 0.1);
+}
+
+.btn-primary {
+  background: var(--color-primary);
+  color: var(--color-text-inverted);
+  padding: 12px 18px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+  letter-spacing: 0.01em;
+  border: none;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 4px 6px rgba(var(--color-primary-rgb), 0.25);
+  cursor: pointer;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--color-primary-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(var(--color-primary-rgb), 0.3);
+}
+
+.btn-primary:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(var(--color-primary-rgb), 0.2);
+}
+
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.error-message {
+  background: rgba(var(--color-error-rgb), 0.1);
   color: var(--color-error);
+  border-left: 4px solid var(--color-error);
+  animation: slideIn 0.3s ease-out;
+  border-radius: 6px;
 }
 
-.border-gray-300 {
-  border-color: var(--color-border);
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.shadow-md {
-  box-shadow: var(--shadow-md);
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  transition: all 0.2s ease;
+  padding: 6px 12px;
+  border-radius: 6px;
 }
 
-.focus\:ring-blue-500:focus {
-  box-shadow: 0 0 0 2px rgba(var(--color-primary-rgb), 0.25);
+a:hover {
+  background: rgba(var(--color-primary-rgb), 0.1);
+  transform: translateY(-1px);
 }
 
-.bg-blue-600 {
-  background-color: var(--color-primary);
+.logo {
+  animation: fadeIn 1s ease-out;
 }
 
-.hover\:bg-blue-700:hover {
-  background-color: var(--color-primary-hover);
-}
-
-.focus\:ring-blue-500:focus {
-  box-shadow: 0 0 0 2px rgba(var(--color-primary-rgb), 0.4);
-}
-
-input, button {
-  transition: all var(--transition-fast);
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

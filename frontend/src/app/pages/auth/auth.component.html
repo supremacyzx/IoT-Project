@@ -1,60 +1,79 @@
-<div class="min-h-screen w-full flex justify-center items-center bg-gray-100">
-  <div class="w-full max-w-md p-6 bg-white rounded-lg shadow-md">
-    <div class="mb-6 text-center">
-      <h1 class="text-2xl font-bold text-gray-800">Anmelden</h1>
-    </div>
+<div class="auth-container flex flex-col items-center justify-center min-h-screen p-6">
+  <!-- Logo -->
+  <div class="logo mb-8">
+    <img src="/images/Logo.svg" alt="Pentaguard Logo" class="h-20 mx-auto">
+  </div>
 
-    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-4">
-      <div class="space-y-2">
-        <label for="username" class="block text-sm font-medium text-gray-700">Benutzername</label>
-        <input
-          id="username"
-          type="text"
-          formControlName="username"
-          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          placeholder="Benutzername eingeben"
-        >
-        <span *ngIf="loginForm.get('username')?.invalid && loginForm.get('username')?.touched"
-              class="text-sm text-red-600">
-          Benutzername ist erforderlich
-        </span>
-      </div>
+  <!-- Login-Formular -->
+  <div class="auth-card w-full max-w-sm p-8 rounded-lg shadow-lg">
+    <h1 class="text-2xl font-bold text-center mb-8">Willkommen zurück</h1>
 
-      <div class="space-y-2">
-        <label for="password" class="block text-sm font-medium text-gray-700">Passwort</label>
-        <input
-          id="password"
-          type="password"
-          formControlName="password"
-          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          placeholder="Passwort eingeben"
-        >
-        <span *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
-              class="text-sm text-red-600">
-          Passwort ist erforderlich
-        </span>
-      </div>
-
-      <div *ngIf="errorMessage" class="text-red-600 text-sm py-2">
-        {{ errorMessage }}
-      </div>
-
-      <div class="flex items-center space-x-4">
-        <button
-          type="submit"
-          [disabled]="loginForm.invalid || isLoading"
-          class="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <span *ngIf="!isLoading">Anmelden</span>
-          <span *ngIf="isLoading" class="flex justify-center items-center">
-            <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            Wird geladen...
-          </span>
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-6">
+      <!-- Fehlermeldung -->
+      <div *ngIf="errorMessage" class="error-message p-4 rounded-md flex items-center">
+        <i-lucide [name]="icons.AlertTriangle" [size]="20" class="mr-2"></i-lucide>
+        <span>{{ errorMessage }}</span>
+        <button type="button" (click)="errorMessage = ''" class="ml-auto">
+          <i-lucide [name]="icons.XCircle" [size]="18"></i-lucide>
         </button>
       </div>
+
+      <!-- Benutzername -->
+      <div>
+        <label for="username" class="block text-sm font-medium mb-2">Benutzername</label>
+        <div class="input-group">
+          <i-lucide [name]="icons.User" [size]="18" class="input-icon"></i-lucide>
+          <input
+            type="text"
+            id="username"
+            formControlName="username"
+            class="input-field"
+            placeholder="Benutzername eingeben"
+          >
+        </div>
+      </div>
+
+      <!-- Passwort -->
+      <div>
+        <label for="password" class="block text-sm font-medium mb-2">Passwort</label>
+        <div class="input-group">
+          <i-lucide [name]="icons.Lock" [size]="18" class="input-icon"></i-lucide>
+          <input
+            [type]="showPassword ? 'text' : 'password'"
+            id="password"
+            formControlName="password"
+            class="input-field"
+            placeholder="Passwort eingeben"
+          >
+          <button type="button" class="toggle-password" (click)="togglePasswordVisibility()">
+            <i-lucide [name]="showPassword ? icons.EyeOff : icons.Eye" [size]="18"></i-lucide>
+          </button>
+        </div>
+      </div>
+
+      <!-- Login-Button -->
+      <button
+        type="submit"
+        class="btn-primary w-full mt-8"
+        [disabled]="loginForm.invalid || isLoading"
+      >
+        <ng-container *ngIf="isLoading">
+          <i-lucide [name]="icons.Loader2" [size]="20" class="animate-spin mr-2"></i-lucide>
+          Anmelden...
+        </ng-container>
+        <ng-container *ngIf="!isLoading">
+          <i-lucide [name]="icons.LogIn" [size]="20" class="mr-2"></i-lucide>
+          Anmelden
+        </ng-container>
+      </button>
     </form>
+
+    <!-- Zurück zur Startseite -->
+    <div class="text-center mt-8">
+      <a [routerLink]="['/']" class="text-sm hover:underline inline-flex items-center justify-center">
+        <i-lucide [name]="icons.LayoutDashboard" [size]="16" class="mr-1"></i-lucide>
+        Zurück zur Startseite
+      </a>
+    </div>
   </div>
 </div>

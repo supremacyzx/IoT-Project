@@ -1,0 +1,148 @@
+<div class="container mx-auto px-4 py-6 max-w-7xl">
+  <!-- Header mit Logo -->
+  <header class="flex justify-between items-center mb-12">
+    <div class="flex items-center">
+      <img src="/images/Logo.svg" alt="Pentaguard Logo" class="h-20 mr-3" onerror="this.src='assets/images/default-image.svg'">
+    </div>
+    <div class="flex space-x-4">
+      <button
+        (click)="navigateTo('/auth')"
+        class="px-4 py-2 rounded-md text-sm flex items-center justify-center"
+        style="background-color: var(--color-primary); color: var(--color-text-inverted); border: var(--border-width) var(--border-style) var(--color-primary);"
+      >
+        <i-lucide [name]="icons.LogIn" [size]="16" [strokeWidth]="2" class="mr-1.5"></i-lucide>
+        Anmelden
+      </button>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="mb-20">
+    <div class="flex flex-col lg:flex-row gap-10">
+      <!-- Left Side: Text Content -->
+      <div class="flex-1 flex flex-col justify-center">
+        <h2 class="text-3xl sm:text-4xl font-bold mb-6" style="color: var(--color-text);">
+          Smarte Sicherheit. Smartere Kontrolle
+        </h2>
+        <p class="mb-8 text-lg" style="color: var(--color-text-secondary); line-height: var(--line-height);">
+          Überwachen Sie Temperatur, Luftfeuchtigkeit, Präsenz und kontrollieren Sie Zugänge mit hoher Konfigurierbarkeit - Alles in einer smarten Plattform.
+        </p>
+
+        <div class="flex flex-col sm:flex-row gap-4 mt-2">
+          <button
+            (click)="navigateTo('/dashboard')"
+            class="px-6 py-3 rounded-md flex items-center justify-center"
+            style="background-color: var(--color-primary); color: var(--color-text-inverted); border: var(--border-width) var(--border-style) var(--color-primary);"
+          >
+            <i-lucide [name]="icons.LayoutDashboard" [size]="18" [strokeWidth]="2" class="mr-2"></i-lucide>
+            Dashboard erkunden
+          </button>
+          <button
+            (click)="navigateTo('/auth')"
+            class="px-6 py-3 rounded-md flex items-center justify-center"
+            style="background-color: var(--color-background-secondary); color: var(--color-text); border: var(--border-width) var(--border-style) var(--color-border);"
+          >
+            <i-lucide [name]="icons.LogIn" [size]="18" [strokeWidth]="2" class="mr-2"></i-lucide>
+            Anmelden
+          </button>
+        </div>
+      </div>
+
+      <!-- Right Side: Feature Cards with improved spacing -->
+      <div class="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <!-- Feature Card 1 -->
+        <div class="p-6 rounded-lg shadow-sm transition-transform hover:transform hover:scale-105"
+             style="background-color: var(--color-background-secondary); border: var(--border-width) var(--border-style) var(--color-border);">
+          <div class="p-3 rounded-full inline-flex mb-4" style="background-color: rgba(var(--color-primary-rgb), 0.1);">
+            <i-lucide [name]="icons.Thermometer" [size]="24" [strokeWidth]="2" style="color: var(--color-primary);"></i-lucide>
+          </div>
+          <h3 class="text-lg font-semibold mb-2" style="color: var(--color-text);">Smarte Überwachung</h3>
+          <p style="color: var(--color-text-secondary);">Echtzeit Überwachung der Temperatur, Luftfeuchtigkeit und Präsenz über mehrere Zonen.</p>
+        </div>
+
+        <!-- Feature Card 2 -->
+        <div class="p-6 rounded-lg shadow-sm transition-transform hover:transform hover:scale-105"
+             style="background-color: var(--color-background-secondary); border: var(--border-width) var(--border-style) var(--color-border);">
+          <div class="p-3 rounded-full inline-flex mb-4" style="background-color: rgba(var(--color-primary-rgb), 0.1);">
+            <i-lucide [name]="icons.Lock" [size]="24" [strokeWidth]="2" style="color: var(--color-primary);"></i-lucide>
+          </div>
+          <h3 class="text-lg font-semibold mb-2" style="color: var(--color-text);">Zugangskontrolle</h3>
+          <p style="color: var(--color-text-secondary);">Sichere, flexible Zugangsberechtigungen mit RFID Optionen.</p>
+        </div>
+
+        <!-- Feature Card 3 -->
+        <div class="p-6 rounded-lg shadow-sm transition-transform hover:transform hover:scale-105"
+             style="background-color: var(--color-background-secondary); border: var(--border-width) var(--border-style) var(--color-border);">
+          <div class="p-3 rounded-full inline-flex mb-4" style="background-color: rgba(var(--color-primary-rgb), 0.1);">
+            <i-lucide [name]="icons.Bell" [size]="24" [strokeWidth]="2" style="color: var(--color-primary);"></i-lucide>
+          </div>
+          <h3 class="text-lg font-semibold mb-2" style="color: var(--color-text);">Benutzerdefinierte Alarme</h3>
+          <p style="color: var(--color-text-secondary);">Erstellen Sie Regeln und Thresholds die sich an Ihre operativen Anforderungen anpassen.</p>
+        </div>
+
+        <!-- Feature Card 4 -->
+        <div class="p-6 rounded-lg shadow-sm transition-transform hover:transform hover:scale-105"
+             style="background-color: var(--color-background-secondary); border: var(--border-width) var(--border-style) var(--color-border);">
+          <div class="p-3 rounded-full inline-flex mb-4" style="background-color: rgba(var(--color-primary-rgb), 0.1);">
+            <i-lucide [name]="icons.LayoutDashboard" [size]="24" [strokeWidth]="2" style="color: var(--color-primary);"></i-lucide>
+          </div>
+          <h3 class="text-lg font-semibold mb-2" style="color: var(--color-text);">Modulares Setup</h3>
+          <p style="color: var(--color-text-secondary);">Passen Sie Sensoren und Steuerungen an Einrichtungen jeder Größe oder Komplexität an.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Konfigurationssektion -->
+  <section class="my-16">
+    <div class="text-center mb-10">
+      <h2 class="text-2xl sm:text-3xl font-bold mb-4" style="color: var(--color-text);">Starke Konfigurationsmöglichkeiten</h2>
+      <p style="color: var(--color-text-secondary);" class="max-w-2xl mx-auto text-lg">
+        Definieren Sie Schwellenwerte, Zonen, und weitere Bedingungen, visuell im Dashboard.
+      </p>
+    </div>
+    <div class="mb-12 flex justify-center">
+      <img src="/images/preview.png" alt="Dashboard Preview" class="max-w-full rounded-lg shadow-lg"
+           style="border: var(--border-width) var(--border-style) var(--color-border);"
+           onerror="this.src='assets/images/default-image.svg'">
+    </div>
+  </section>
+
+  <!-- Technologie-Sektion -->
+  <section class="my-16">
+    <div class="text-center mb-10">
+      <h2 class="text-2xl sm:text-3xl font-bold mb-4" style="color: var(--color-text);">Unsere Technologien</h2>
+      <p style="color: var(--color-text-secondary);" class="max-w-2xl mx-auto text-lg">
+        Unsere Plattform nutzt modernste Technologien für eine zuverlässige und sichere Leistung.
+      </p>
+    </div>
+    <div class="mb-12">
+      <app-slideshow [slideShowElements]="techStack" direction="left"></app-slideshow>
+    </div>
+  </section>
+
+  <!-- CTA Sektion -->
+  <section class="my-16 p-8 rounded-lg text-center" style="background-color: var(--color-background-secondary); border: var(--border-width) var(--border-style) var(--color-border);">
+    <h2 class="text-2xl sm:text-3xl font-bold mb-4" style="color: var(--color-text);">Erleben Sie Pentaguard in Aktion</h2>
+    <p class="text-lg mb-6" style="color: var(--color-text-secondary);">
+      Buchen Sie eine personalisierte Demo und erkunden Sie wie Sie jeden Part Ihres Betriebsumfeldes anpassen können.
+    </p>
+    <div class="flex justify-center">
+      <button
+        (click)="navigateTo('/auth')"
+        class="px-8 py-3 rounded-md flex items-center justify-center text-lg"
+        style="background-color: var(--color-primary); color: var(--color-text-inverted); border: var(--border-width) var(--border-style) var(--color-primary);"
+      >
+        <i-lucide [name]="icons.LogIn" [size]="20" [strokeWidth]="2" class="mr-2"></i-lucide>
+        Demo buchen!
+      </button>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="mt-16 pt-8 border-t text-center" style="border-color: var(--color-border);">
+    <p class="text-sm" style="color: var(--color-text-secondary);">
+      &copy; 2025 Pentaguard Solutions. Alle Rechte vorbehalten.
+    </p>
+  </footer>
+</div>
