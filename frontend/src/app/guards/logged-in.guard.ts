@@ -17,7 +17,7 @@ export class LoggedInGuard implements CanActivate {
           return true;
         }
         // Wenn der Benutzer bereits angemeldet ist, zum Dashboard umleiten
-        return this.router.createUrlTree(['/dashboard']);
+        return this.router.createUrlTree(['/incidents']);
       })
     );
   }

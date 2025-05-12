@@ -65,7 +65,7 @@ export class AuthComponent {
     this.authService.login(this.loginForm.value).subscribe({
       next: () => {
         this.isLoading = false;
-        this.router.navigate(['/dashboard']);
+        this.router.navigate(['/incidents']);
       },
       error: (error) => {
         this.isLoading = false;
