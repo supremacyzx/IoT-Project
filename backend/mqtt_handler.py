@@ -7,6 +7,7 @@ import time
 import dotenv
 from dotenv import load_dotenv
 import uuid
+import requests
 
 # Load environment variables
 load_dotenv()
@@ -61,6 +62,15 @@ class MQTTClient:
         client.subscribe(MQTT_TOPIC_DATA)
         client.subscribe(MQTT_TOPIC_INCIDENTS)
         client.subscribe(MQTT_TOPIC_CONFIG)
+
+    def send_ntfy_notification(self, topic, message):
+        url = f"http://10.93.140.165:90/{topic}"
+        response = requests.post(url, data=message.encode("utf-8"))
+        print(response.status_code, response.text)
+
+    # Example usage
+    
+
 
     def send_message(self, topic, msg):
         try:
@@ -132,11 +142,15 @@ class MQTTClient:
                             self.clients.remove(ws)
                 except Exception as e:
                     print(f"Error sending message to clients: {e}")
+                
                 alarm_type = payload.get("type", "unknown")
                 value_json = json.dumps(payload)
                 timestamp = datetime.now()
+                if payload["type"] == "alarm":
+                    self.send_ntfy_notification("RZ", str(payload))
                 print(timestamp)
                 print(value_json)
+
                 conn = sqlite3.connect(DATABASE)
                 cursor = conn.cursor()
                 cursor.execute('''
