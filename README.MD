@@ -4,11 +4,11 @@
 
 | Name | Rolle                                        |
 |------|----------------------------------------------|
-| Dominique Diener | Backend & Hardware & Mikrocontroller         |
-| Yannick Rörsch | Frontend & UI/UX & Datenbank                 |
-| Joshua Barthel | Hardware & Projektmanagement & Dokumentation                     
-| Salvatore Ferreri | Projektmanagement & Dokumentation & Netzwerk         |
-| Felix Stüber | Projektmanagement & Dokumentation & Netzwerk |
+| xxx | Backend & Hardware & Mikrocontroller         |
+| xxx | Frontend & UI/UX & Datenbank                 |
+| xxx | Hardware & Projektmanagement & Dokumentation                     
+| xxx | Projektmanagement & Dokumentation & Netzwerk         |
+| xxx | Projektmanagement & Dokumentation & Netzwerk |
 
 ---
 
